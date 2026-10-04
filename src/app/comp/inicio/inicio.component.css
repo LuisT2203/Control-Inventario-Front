@@ -1,0 +1,20 @@
+.contenedor { max-width: 760px; margin: 0 auto; padding: 16px; }
+h1 { font-size: 22px; }
+h2 { font-size: 18px; }
+.stat b { font-size: 30px; }
+h1 small { color: var(--mute); font-size: 1rem; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tarjeta { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.mute { color: var(--mute); }
+.lista { padding: 0; overflow: hidden; }
+.row {
+  display: flex; justify-content: space-between; gap: 8px; padding: 14px 16px;
+  border-bottom: 1px solid var(--line); text-decoration: none; color: var(--ink);
+  font-size: 1.05rem; min-height: 56px; align-items: center;
+}
+.row:last-child { border-bottom: none; }
+.cero { color: var(--bad); font-weight: 700; white-space: nowrap; }
+.error {
+  background: var(--card); color: var(--bad); border: 1px solid var(--bad);
+  border-radius: 12px; padding: 12px; margin: 12px 0; font-weight: 700;
+}

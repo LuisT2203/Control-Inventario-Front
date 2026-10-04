@@ -1,0 +1,56 @@
+.pantalla {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.tarjeta {
+  width: 100%;
+  max-width: 420px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 24px;
+}
+.marca {
+  display: inline-block;
+  background: var(--sel);
+  color: var(--onsel);
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+}
+.ayuda { color: var(--mute); }
+label { display: block; margin: 12px 0; font-weight: 600; }
+input {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 14px;
+  font-size: 1.1rem;
+  border-radius: 10px;
+  border: 2px solid var(--line);
+  background: var(--card);
+}
+.error {
+  background: var(--card);
+  color: var(--bad);
+  border: 1px solid var(--bad);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 12px 0;
+  font-weight: 700;
+}
+button.grande {
+  width: 100%;
+  min-height: 54px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  background: var(--acc);
+  color: var(--onacc);
+}
+button.grande:disabled { opacity: 0.6; }

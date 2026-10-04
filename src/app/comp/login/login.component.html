@@ -1,0 +1,19 @@
+<div class="pantalla">
+  <div class="tarjeta">
+    <div class="marca">Kardex</div>
+    <h1>Entrar a la tablet</h1>
+    <p class="ayuda">Rosita usa Uniformes y Religiosos. Mary usa Limpieza.</p>
+    <label>Usuario
+      <input [(ngModel)]="usuario" name="usuario" autocomplete="username" placeholder="rosita o mary">
+    </label>
+    <label>Clave
+      <input [(ngModel)]="clave" name="clave" type="password" autocomplete="current-password" placeholder="••••••">
+    </label>
+    @if (error) {
+      <div class="error">{{ error }}</div>
+    }
+    <button class="grande primario" (click)="entrar()" [disabled]="cargando">
+      {{ cargando ? 'Entrando…' : 'Entrar' }}
+    </button>
+  </div>
+</div>

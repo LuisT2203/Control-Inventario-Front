@@ -1,0 +1,95 @@
+<div class="contenedor">
+  <h1>Vender <small>{{ nombreLocal }}</small></h1>
+
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+
+  <div class="split">
+    <section class="col">
+      <input [(ngModel)]="texto" name="texto" (ngModelChange)="alBuscar()" placeholder="Buscar por código o nombre">
+      @if (!texto.trim() && exigeTalla && !categoria) {
+        <div class="cats">
+          @for (c of conteos; track c.tipo) {
+            <button class="cat" (click)="elegirCategoria(c.tipo)">
+              <b>{{ c.tipo }}</b>
+              <small>{{ c.fichas }} opciones · {{ c.unidades }} u.</small>
+            </button>
+          }
+        </div>
+      } @else {
+        @if (categoria) {
+          <div class="vuelta">
+            <button (click)="elegirCategoria('')">← Todas</button>
+            <h2>{{ categoria }}</h2>
+          </div>
+        }
+        @if (!exigeTalla && !texto.trim()) {
+          <div class="seg2 sc" role="group" aria-label="Categoría">
+            <button [class.on]="categoria === ''" (click)="elegirCategoria('')">Todo</button>
+            @for (c of categorias; track c) {
+              <button [class.on]="categoria === c" (click)="elegirCategoria(c)">{{ c }}</button>
+            }
+          </div>
+        }
+        <div class="rows">
+          @for (p of visibles; track p.idProducto) {
+            <button class="rw" [class.sin-stock]="(p.stock ?? 0) <= 0" (click)="agregar(p)">
+              <span><b>{{ p.codigo }}</b> {{ p.nombre }} {{ p.talla ?? '' }}</span>
+              <span class="der">{{ p.stock }} u. · {{ p.precioVenta != null ? 'S/ ' + p.precioVenta : 'sin precio' }}</span>
+            </button>
+          }
+        </div>
+        @if (totalCoinciden > limite) {
+          <button class="ver-mas" (click)="limite = limite + 20">Ver más ({{ totalCoinciden - limite }})</button>
+        }
+      }
+    </section>
+
+    <aside class="side tarjeta">
+      <h2>La venta</h2>
+      @if (!lineas.length) {
+        <p class="mute">Toca un producto para agregarlo.</p>
+      }
+      @for (l of lineas; track l.producto.idProducto; let i = $index) {
+        <div class="crow">
+          <div>
+            <b>{{ l.producto.codigo }}</b> {{ l.producto.nombre }}
+            @if (l.producto.precioVenta != null) {
+              <div class="mute">S/ {{ l.producto.precioVenta }} c/u</div>
+            } @else {
+              <label class="precio">Precio c/u
+                <input [(ngModel)]="l.precio" name="precio{{i}}" type="number" min="0" step="0.01">
+              </label>
+            }
+          </div>
+          <div class="cant">
+            <button (click)="l.cantidad = l.cantidad > 1 ? l.cantidad - 1 : 1">−</button>
+            <span>{{ l.cantidad }}</span>
+            <button (click)="l.cantidad = l.cantidad + 1">+</button>
+          </div>
+          <button class="quitar" (click)="quitar(i)">×</button>
+        </div>
+      }
+      <button class="grande primario" (click)="confirmar()">Confirmar venta</button>
+    </aside>
+  </div>
+</div>
+
+@if (recibo) {
+  <app-drawer titulo="Venta N° {{ recibo.idVenta }}" (cerrar)="cerrarRecibo()">
+    <p class="mute">{{ recibo.fechaHora | fechaCorta }}</p>
+    <table class="doct">
+      <thead><tr><th>Producto</th><th class="r">Cant.</th><th class="r">Precio</th><th class="r">Subtotal</th></tr></thead>
+      <tbody>
+        @for (m of recibo.lineas; track m.idMovimiento) {
+          <tr><td><b>{{ m.codigoProducto }}</b><br><small>{{ m.nombreProducto }}</small></td>
+          <td class="r">{{ m.cantidad }}</td><td class="r">{{ m.precioUnitario | soles }}</td>
+          <td class="r">{{ (m.precioUnitario != null ? m.cantidad * m.precioUnitario : null) | soles }}</td></tr>
+        }
+      </tbody>
+    </table>
+    <div class="total">Total: {{ recibo.total | soles }}</div>
+    <div class="total">Ganancia: {{ gananciaRecibo() }}</div>
+  </app-drawer>
+}

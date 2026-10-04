@@ -1,0 +1,23 @@
+<div class="contenedor">
+  <h1>¿Qué local abres?</h1>
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+  <div class="grilla">
+    @for (local of locales; track local.idLocal) {
+      <div class="local">
+        <span class="nombre">{{ local.nombre }}</span>
+        <span class="detalle">{{ local.exigeTalla ? 'Tipo + talla' : 'Sin talla' }}</span>
+        <div class="fila">
+          <a class="boton" [routerLink]="['/inicio', local.idLocal]">Inicio</a>
+          <a class="boton primario" [routerLink]="['/venta', local.idLocal]">Vender</a>
+          <a class="boton" [routerLink]="['/compra', local.idLocal]">Comprar</a>
+          <a class="boton" [routerLink]="['/productos', local.idLocal]">Fichas</a>
+        </div>
+      </div>
+    }
+  </div>
+  @if (!locales.length && !error) {
+    <p class="ayuda">Cargando locales…</p>
+  }
+</div>

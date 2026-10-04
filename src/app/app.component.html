@@ -1,0 +1,24 @@
+<div class="app">
+  @if (dentro) {
+    <nav>
+      <div class="brand">Kardex</div>
+      <div class="seg">
+        @for (l of locales; track l.idLocal) {
+          <button [class.on]="l.idLocal === idLocal" (click)="irTienda(l.idLocal!)">{{ l.nombre }}</button>
+        }
+      </div>
+      <a [routerLink]="['/inicio', idLocal]" routerLinkActive="on">Inicio</a>
+      <a [routerLink]="['/venta', idLocal]" routerLinkActive="on">Vender</a>
+      <a [routerLink]="['/compra', idLocal]" routerLinkActive="on">Comprar</a>
+      <a [routerLink]="['/productos', idLocal]" routerLinkActive="on">Productos</a>
+      <a [routerLink]="['/kardex-local', idLocal]" routerLinkActive="on">Kardex</a>
+      <button class="salir" (click)="salir()">{{ auth.getUsuario() }} · Salir</button>
+    </nav>
+  }
+  <div class="content">
+    <main>
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
+<app-toast></app-toast>

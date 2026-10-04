@@ -1,0 +1,34 @@
+<div class="contenedor">
+  <h1>Inicio <small>{{ nombreLocal }}</small></h1>
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+  <div class="stats">
+    <div class="tarjeta stat">
+      <span class="mute">Ventas de hoy</span>
+      <b>{{ totalHoy | soles }}</b>
+      <small class="mute">{{ ventasHoy }} {{ ventasHoy === 1 ? 'venta' : 'ventas' }}</small>
+    </div>
+    <div class="tarjeta stat">
+      <span class="mute">Por reponer</span>
+      <b>{{ totalFaltantes }}</b>
+      <small class="mute">fichas en cero o bajo mínimo</small>
+    </div>
+  </div>
+  <h2>Por reponer</h2>
+  @if (faltantes.length) {
+    <div class="tarjeta lista">
+      @for (p of faltantes; track p.idProducto) {
+        <a class="row" [routerLink]="['/kardex', p.idProducto]">
+          <span>{{ p.codigo }} · {{ p.nombre }}</span>
+          <span class="cero">{{ p.stock }} {{ p.unidad }}</span>
+        </a>
+      }
+    </div>
+    @if (totalFaltantes > faltantes.length) {
+      <p class="mute">y {{ totalFaltantes - faltantes.length }} más. Míralos en <a [routerLink]="['/productos', idLocal]">Productos</a> con "Solo sin stock".</p>
+    }
+  } @else {
+    <p class="mute">Todo tiene stock.</p>
+  }
+</div>

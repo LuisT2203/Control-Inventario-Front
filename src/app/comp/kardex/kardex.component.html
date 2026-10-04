@@ -1,0 +1,91 @@
+<div class="contenedor">
+  <a routerLink="/locales" class="volver">← Locales</a>
+  @if (kardex) {
+    <h1>{{ kardex.producto.codigo }}</h1>
+    <p class="sub">{{ kardex.producto.nombre }} · Saldo: <strong>{{ kardex.producto.stock }} {{ kardex.producto.unidad }}</strong></p>
+    @if (kardex.producto.detalle) {
+      <p class="sub">{{ kardex.producto.detalle }}</p>
+    }
+  }
+
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+  @if (aviso) {
+    <div class="aviso">{{ aviso }}</div>
+  }
+
+  <div class="tarjeta">
+    <h2>Registrar movimiento</h2>
+    <label>Tipo
+      <select [(ngModel)]="mov.tipo" name="tipo">
+        <option value="ENTRADA">Entrada</option>
+        <option value="SALIDA">Salida</option>
+        <option value="DEVOLUCION">Devolución</option>
+      </select>
+    </label>
+    <label>Cantidad
+      <input [(ngModel)]="mov.cantidad" name="cantidad" type="number" min="0.01" step="0.01">
+    </label>
+    <label>Quién se lo lleva (opcional)
+      <input [(ngModel)]="mov.personaRetira" name="persona" placeholder="Nombre">
+    </label>
+    <label>Destino (opcional)
+      <input [(ngModel)]="mov.destino" name="destino" placeholder="Baño, aula…">
+    </label>
+    <button class="grande primario" (click)="guardarMovimiento()">Guardar movimiento</button>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Cambio (vuelve uno, se lleva otro)</h2>
+    <label>Vuelve esta ficha
+      <select [(ngModel)]="cambio.idProductoEntra" name="entra">
+        @for (p of otros; track p.idProducto) {
+          <option [value]="p.idProducto">{{ p.codigo }} ({{ p.stock }})</option>
+        }
+      </select>
+    </label>
+    <label>Cantidad que vuelve
+      <input [(ngModel)]="cambio.cantidadEntra" name="cantEntra" type="number" min="0.01" step="0.01">
+    </label>
+    <label>Se lleva esta ficha
+      <select [(ngModel)]="cambio.idProductoSale" name="sale">
+        @for (p of otros; track p.idProducto) {
+          <option [value]="p.idProducto">{{ p.codigo }} ({{ p.stock }})</option>
+        }
+      </select>
+    </label>
+    <label>Cantidad que se lleva
+      <input [(ngModel)]="cambio.cantidadSale" name="cantSale" type="number" min="0.01" step="0.01">
+    </label>
+    <button class="grande" (click)="guardarCambio()">Guardar cambio</button>
+  </div>
+
+  <h2>Ficha</h2>
+  <div class="tarjeta tabla">
+    <table>
+      <thead><tr><th>Fecha</th><th>Motivo</th><th>Entrada</th><th>Salida</th><th>Saldo</th></tr></thead>
+      <tbody>
+        @for (m of kardex?.movimientos; track m.idMovimiento) {
+          <tr>
+            <td>{{ m.fechaHora }}</td>
+            <td>{{ m.motivo ?? m.tipo }}
+              @if (m.grupoVenta) {
+                <span class="cambio">venta</span>
+              }
+              @if (m.grupoCambio) {
+                <span class="cambio">cambio</span>
+              }
+              @if (m.grupoCompra) {
+                <span class="cambio">compra</span>
+              }
+            </td>
+            <td class="bien">{{ m.tipo === 'ENTRADA' || m.tipo === 'DEVOLUCION' ? m.cantidad : '' }}</td>
+            <td class="mal">{{ m.tipo === 'SALIDA' ? m.cantidad : '' }}</td>
+            <td><strong>{{ m.saldoResultante }}</strong></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

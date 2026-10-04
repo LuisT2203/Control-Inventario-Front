@@ -1,0 +1,27 @@
+.app { display: flex; height: 100vh; }
+nav {
+  width: 204px; flex-shrink: 0; background: var(--card); border-right: 1px solid var(--line);
+  padding: 16px 12px; display: flex; flex-direction: column; gap: 6px; overflow: auto;
+}
+.brand { font-size: 22px; font-weight: 700; padding: 0 8px 8px; }
+.seg { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+nav a, nav button {
+  text-align: left; border: 0; background: none; color: var(--mute); font-size: 17px;
+  min-height: 48px; border-radius: 10px; padding: 0 10px; text-decoration: none;
+  display: flex; align-items: center; cursor: pointer;
+}
+nav a.on { background: var(--sel); color: var(--onsel); font-weight: 700; }
+.seg button.on { background: var(--acc); color: var(--onacc); font-weight: 700; }
+nav .salir { margin-top: auto; font-size: 14px; min-height: 44px; }
+.content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+main { flex: 1; min-height: 0; overflow: auto; }
+@media (max-width: 760px) {
+  .app { flex-direction: column; height: auto; min-height: 100vh; }
+  nav {
+    width: auto; flex-direction: row; flex-wrap: nowrap; overflow-x: auto;
+    border-right: 0; border-bottom: 1px solid var(--line); padding: 8px; align-items: center;
+  }
+  .brand, nav .salir { display: none; }
+  .seg { flex-direction: row; margin: 0; padding: 0 8px 0 0; border: 0; border-right: 1px solid var(--line); }
+  nav a, nav button { white-space: nowrap; font-size: 16px; }
+}

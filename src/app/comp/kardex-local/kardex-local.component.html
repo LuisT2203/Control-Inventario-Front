@@ -1,0 +1,93 @@
+<div class="contenedor">
+  <h1>Kardex <small>{{ nombreLocal }}</small></h1>
+
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+
+  <div class="filtros">
+    <div class="dias">
+      <button class="chip" [class.activo]="dias === 1" (click)="dias = 1; cargar()">Hoy</button>
+      <button class="chip" [class.activo]="dias === 7" (click)="dias = 7; cargar()">7 días</button>
+      <button class="chip" [class.activo]="dias === 30" (click)="dias = 30; cargar()">30 días</button>
+    </div>
+    <input [(ngModel)]="texto" name="texto" placeholder="Filtrar por producto, código o motivo…">
+  </div>
+
+  <div class="tarjeta tabla">
+    <table>
+      <thead><tr><th>Fecha</th><th>Producto</th><th>Motivo</th><th>Entrada</th><th>Salida</th><th>Saldo</th></tr></thead>
+      <tbody>
+        @for (m of visibles; track m.idMovimiento) {
+          <tr (click)="abrir(m)">
+            <td class="nw">{{ m.fechaHora | fechaCorta }}</td>
+            <td><strong>{{ m.codigoProducto }}</strong><br><small>{{ m.nombreProducto }}</small></td>
+            <td>{{ m.motivo ?? m.tipo }}</td>
+            <td class="bien">{{ m.tipo === 'ENTRADA' || m.tipo === 'DEVOLUCION' ? m.cantidad : '' }}</td>
+            <td class="mal">{{ m.tipo === 'SALIDA' ? m.cantidad : '' }}</td>
+            <td><strong>{{ m.saldoResultante }}</strong></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    @if (!filtrados.length) {
+      <p class="mute">Sin movimientos en el período.</p>
+    }
+  </div>
+  @if (filtrados.length > limite) {
+    <button class="ver-mas" (click)="limite = limite + 30">Ver más ({{ filtrados.length - limite }})</button>
+  }
+</div>
+
+@if (mov && !reciboVenta && !reciboCompra) {
+  <app-drawer titulo="{{ mov.motivo ?? mov.tipo }}" (cerrar)="cerrarTodo()">
+    <p class="mute">{{ mov.codigoProducto }} · {{ mov.nombreProducto }}</p>
+    <div class="facts">
+      <div><small>Fecha</small><b class="chica">{{ mov.fechaHora }}</b></div>
+      <div><small>{{ mov.tipo === 'SALIDA' ? 'Salió' : 'Entró' }}</small><b>{{ mov.cantidad }} u.</b></div>
+      <div><small>Saldo</small><b>{{ mov.saldoResultante }} u.</b></div>
+    </div>
+    @if (mov.precioUnitario != null) {
+      <p>Precio: <b>S/ {{ mov.precioUnitario }}</b></p>
+    }
+    @if (mov.costoUnitario != null) {
+      <p>Costo: <b>S/ {{ mov.costoUnitario }}</b></p>
+    }
+    <button class="grande" (click)="verFicha()">Ver todos los movimientos</button>
+  </app-drawer>
+}
+
+@if (reciboVenta) {
+  <app-drawer titulo="Venta N° {{ reciboVenta.idVenta }}" (cerrar)="cerrarTodo()">
+    <p class="mute">{{ reciboVenta.fechaHora | fechaCorta }}</p>
+    <table class="doct">
+      <thead><tr><th>Producto</th><th class="r">Cant.</th><th class="r">Precio</th><th class="r">Subtotal</th></tr></thead>
+      <tbody>
+        @for (m of reciboVenta.lineas; track m.idMovimiento) {
+          <tr><td><b>{{ m.codigoProducto }}</b><br><small>{{ m.nombreProducto }}</small></td>
+          <td class="r">{{ m.cantidad }}</td><td class="r">{{ m.precioUnitario | soles }}</td>
+          <td class="r">{{ (m.precioUnitario != null ? m.cantidad * m.precioUnitario : null) | soles }}</td></tr>
+        }
+      </tbody>
+    </table>
+    <div class="total">Total: {{ reciboVenta.total | soles }}</div>
+    <div class="total">Ganancia: {{ ganancia(reciboVenta.lineas) }}</div>
+  </app-drawer>
+}
+
+@if (reciboCompra) {
+  <app-drawer titulo="Compra N° {{ reciboCompra.idCompra }}" (cerrar)="cerrarTodo()">
+    <p class="mute">{{ reciboCompra.fechaHora | fechaCorta }}</p>
+    <table class="doct">
+      <thead><tr><th>Producto</th><th class="r">Cant.</th><th class="r">Costo</th><th class="r">Subtotal</th></tr></thead>
+      <tbody>
+        @for (m of reciboCompra.lineas; track m.idMovimiento) {
+          <tr><td><b>{{ m.codigoProducto }}</b><br><small>{{ m.nombreProducto }}</small></td>
+          <td class="r">{{ m.cantidad }}</td><td class="r">{{ m.costoUnitario | soles }}</td>
+          <td class="r">{{ (m.costoUnitario != null ? m.cantidad * m.costoUnitario : null) | soles }}</td></tr>
+        }
+      </tbody>
+    </table>
+    <div class="total">Total: {{ reciboCompra.total | soles }}</div>
+  </app-drawer>
+}

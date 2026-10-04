@@ -1,0 +1,249 @@
+<div class="contenedor">
+  <h1>Productos <small>{{ nombreLocal }}</small></h1>
+
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+  @if (aviso) {
+    <div class="aviso">{{ aviso }}</div>
+  }
+
+  <div class="prodwrap">
+    <aside class="rail tarjeta" aria-label="Categorías">
+      <h3>Categorías</h3>
+      <p class="leg"><span class="dot"></span> Hay productos sin stock</p>
+      <button class="ri" [class.on]="categoria === ''" (click)="elegirCategoria('')">
+        <span>Todas</span><small>{{ totalCoinciden }}</small>
+      </button>
+      @for (c of conteos; track c.tipo) {
+        <button class="ri" [class.on]="categoria === c.tipo" (click)="elegirCategoria(c.tipo)">
+          <span>{{ c.tipo }}</span>
+          <small>@if (c.sinStock) {<span class="dot" role="img" aria-label="hay productos sin stock"></span>}{{ c.fichas }}</small>
+        </button>
+      }
+    </aside>
+    <section class="pcol">
+      <input [(ngModel)]="texto" name="texto" (ngModelChange)="alBuscar()" placeholder="Buscar por código, nombre o talla">
+      <select class="mob" [(ngModel)]="categoria" (ngModelChange)="elegirCategoria(categoria)" aria-label="Categoría">
+        <option value="">Todas las categorías</option>
+        @for (c of categorias; track c) {
+          <option [value]="c">{{ c }}</option>
+        }
+      </select>
+      <div class="tools2">
+        <div class="seg2" role="group" aria-label="Vista">
+          <button [class.on]="vista === 'precios'" (click)="cambiarVista('precios')">Precios</button>
+          <button [class.on]="vista === 'costos'" (click)="cambiarVista('costos')">Costos y ganancias</button>
+        </div>
+        <button class="sw" role="switch" [attr.aria-checked]="soloSinStock" (click)="alternarSinStock()"><i></i>Solo sin stock</button>
+        <button class="sw" role="switch" [attr.aria-checked]="soloSinPrecio" (click)="alternarSinPrecio()"><i></i>Solo sin precio</button>
+        @if (categoria && exigeTalla) {
+          <button class="act" (click)="abrirPreciosPrenda()">Poner precios de esta prenda</button>
+        }
+      </div>
+      <button class="chip accion" (click)="nuevaFicha()">+ Producto</button>
+
+  @if (mostrandoFormulario) {
+    <div class="tarjeta">
+      <h2>{{ editandoId ? 'Editar producto' : 'Nuevo producto' }}</h2>
+      <label>Código
+        <input [(ngModel)]="form.codigo" name="codigo" placeholder="CHOMPA-8">
+      </label>
+      <label>Nombre
+        <input [(ngModel)]="form.nombre" name="nombre" placeholder="Chompa">
+      </label>
+      <label>Categoría
+        <input [(ngModel)]="form.tipo" name="tipo" placeholder="Blusas, Medallas, Vestuario…">
+      </label>
+      @if (exigeTalla) {
+        <label>Talla
+          <input [(ngModel)]="form.talla" name="talla" placeholder="8">
+        </label>
+      } @else {
+        <label>Descripción
+          <input [(ngModel)]="form.detalle" name="detalle" placeholder="Material, modelo…">
+        </label>
+      }
+      <label>Unidad
+        <select [(ngModel)]="form.unidad" name="unidad">
+          <option value="UND">Unidad</option>
+          <option value="GALON">Galón</option>
+        </select>
+      </label>
+      @if (!editandoId) {
+        <label>Stock inicial
+          <input [(ngModel)]="form.stockInicial" name="stockInicial" type="number" min="0" step="0.01">
+        </label>
+      }
+      <label>Stock mínimo
+        <input [(ngModel)]="form.stockMinimo" name="stockMinimo" type="number" min="0" step="0.01">
+      </label>
+      <div class="fila">
+        <button class="grande primario" (click)="guardar()">Guardar</button>
+        <button class="grande" (click)="mostrandoFormulario = false">Cerrar</button>
+      </div>
+    </div>
+  }
+
+  @if (vista === 'precios') {
+    <div class="tarjeta tabla">
+      <table>
+        <thead><tr><th>Código</th><th>Producto</th><th class="der">Stock</th><th class="der">Precio</th></tr></thead>
+        <tbody>
+          @for (p of visibles; track p.idProducto) {
+            <tr (click)="abrirFicha(p)">
+              <td class="nw"><b>{{ p.codigo }}</b></td>
+              <td>{{ p.nombre }} {{ p.talla ?? p.detalle ?? '' }}</td>
+              <td class="der {{ (p.stock ?? 0) <= 0 ? 'mal' : '' }}">{{ p.stock }}</td>
+              <td class="der nw">{{ p.precioVenta != null ? (p.precioVenta | soles) : 'sin precio' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      @if (!visibles.length) {
+        <p class="mute">No hay productos con ese filtro.</p>
+      }
+    </div>
+    @if (totalCoinciden > limite) {
+      <button class="ver-mas" (click)="limite = limite + 30">Ver más ({{ totalCoinciden - limite }})</button>
+    }
+  } @else {
+    <div class="tarjeta tabla desplaza">
+      <table class="costos">
+        <thead><tr><th class="fija">Código</th><th>Stock</th><th>Costo</th><th>Precio</th><th>Costo total</th><th>Valor en stock</th><th>Ganancia</th><th>% s/ costo</th></tr></thead>
+        <tbody>
+          @for (p of baseCostos; track p.idProducto) {
+            <tr (click)="abrirFicha(p)">
+              <td class="fija nw"><b>{{ p.codigo }}</b></td>
+              <td>{{ p.stock }}</td>
+              <td class="nw">{{ p.costoReferencia | soles }}</td>
+              <td class="nw">{{ p.precioVenta | soles }}</td>
+              <td class="nw">{{ costoTotal(p) | soles }}</td>
+              <td class="nw">{{ valorStock(p) | soles }}</td>
+              <td class="nw {{ (ganancia(p) ?? 0) < 0 ? 'mal' : '' }}">{{ ganancia(p) | soles }}</td>
+              <td class="nw">{{ pctCosto(p) != null ? pctCosto(p) + '%' : '—' }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot><tr><td class="fija"><b>Total</b></td><td></td><td></td><td></td>
+        <td class="nw"><b>{{ sumaCostoTotal | soles }}</b></td><td class="nw"><b>{{ sumaValorStock | soles }}</b></td>
+        <td class="nw"><b>{{ sumaGanancia | soles }}</b></td><td></td></tr></tfoot>
+      </table>
+      @if (!baseCostos.length) {
+        <p class="mute">No hay productos con ese filtro.</p>
+      }
+    </div>
+    <p class="mute">No incluidos: {{ fueraCosto }} sin costo, {{ fueraPrecio }} sin precio, {{ fueraGanancia }} sin ganancia.</p>
+  }
+    </section>
+  </div>
+</div>
+
+@if (ficha && !reciboVenta && !reciboCompra) {
+  <app-drawer titulo="{{ ficha.producto.codigo }}" (cerrar)="cerrarFicha()">
+    <p class="mute">{{ ficha.producto.nombre }}</p>
+    <div class="facts">
+      <div><small>Stock</small><b>{{ ficha.producto.stock }} u.</b></div>
+      <div><small>Precio</small><b>{{ ficha.producto.precioVenta != null ? 'S/ ' + ficha.producto.precioVenta : 'sin precio' }}</b></div>
+      <div><small>Costo</small><b>{{ ficha.producto.costoReferencia != null ? 'S/ ' + ficha.producto.costoReferencia : 'sin costo' }}</b></div>
+    </div>
+    <h3>Cambiar precio y costo</h3>
+    <div class="pc-grid">
+      <label>Precio
+        <input [(ngModel)]="nuevoPrecio" name="nuevoPrecio" type="number" min="0" step="0.01">
+      </label>
+      <label>Costo
+        <input [(ngModel)]="nuevoCosto" name="nuevoCosto" type="number" min="0" step="0.01">
+      </label>
+    </div>
+    <p class="ganancia {{ gananciaPrevia.mala ? 'mal' : '' }}">Ganancia: {{ gananciaPrevia.texto }}</p>
+    @if (errorPrecio) {
+      <div class="error">{{ errorPrecio }}</div>
+    }
+    @if (avisoPrecio) {
+      <div class="aviso">{{ avisoPrecio }}</div>
+    }
+    <button class="grande primario" (click)="guardarPrecioCosto()">Guardar</button>
+    <h3>Movimientos</h3>
+    @for (m of ficha.movimientos; track m.idMovimiento) {
+      <button class="mov" (click)="abrirDoc(m)">
+        <span>{{ m.fechaHora }} · {{ m.motivo ?? m.tipo }}</span>
+        <span class="{{ m.tipo === 'SALIDA' ? 'mal' : 'bien' }}">{{ m.tipo === 'SALIDA' ? '−' : '+' }}{{ m.cantidad }} · {{ m.saldoResultante }}</span>
+      </button>
+    }
+    <div class="fila">
+      <a class="boton" [routerLink]="['/kardex', ficha.producto.idProducto]" (click)="cerrarFicha()">Kardex completo</a>
+      <button class="boton" (click)="editarDesdeFicha()">Editar</button>
+      <button class="boton peligro" (click)="eliminarDesdeFicha()">Borrar</button>
+    </div>
+  </app-drawer>
+}
+
+@if (prenda) {
+  <app-drawer titulo="Precios de {{ categoria }}" (cerrar)="cerrarPrenda()">
+    <div class="pc-grid">
+      <label>Mismo precio para todas
+        <input [(ngModel)]="mismoPrecio" name="mismoPrecio" type="number" min="0" step="0.01">
+      </label>
+      <label>Mismo costo para todas
+        <input [(ngModel)]="mismoCosto" name="mismoCosto" type="number" min="0" step="0.01">
+      </label>
+    </div>
+    <button class="grande" (click)="aplicarATodas()">Aplicar a todas</button>
+    <table class="tallas">
+      <thead><tr><th>Talla</th><th>Stock</th><th>Precio</th><th>Costo</th></tr></thead>
+      <tbody>
+        @for (t of prenda; track t.codigo; let i = $index) {
+          <tr [class.mal]="t.precio != null && t.costo != null && t.precio < t.costo">
+            <td><b>{{ t.talla ?? '—' }}</b><br><small>{{ t.codigo }}</small></td>
+            <td>{{ t.stock }}</td>
+            <td><input [(ngModel)]="t.precio" name="pp{{i}}" type="number" min="0" step="0.01"></td>
+            <td><input [(ngModel)]="t.costo" name="cc{{i}}" type="number" min="0" step="0.01"></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    @if (errorPrenda) {
+      <div class="error">{{ errorPrenda }}</div>
+    }
+    @if (avisoPrenda) {
+      <div class="aviso">{{ avisoPrenda }}</div>
+    }
+    <button class="grande primario" (click)="guardarPrenda()">Guardar precios</button>
+  </app-drawer>
+}
+
+@if (reciboVenta) {
+  <app-drawer titulo="Venta N° {{ reciboVenta.idVenta }}" (cerrar)="reciboVenta = null">
+    <p class="mute">{{ reciboVenta.fechaHora | fechaCorta }}</p>
+    <table class="doct">
+      <thead><tr><th>Producto</th><th class="r">Cant.</th><th class="r">Precio</th><th class="r">Subtotal</th></tr></thead>
+      <tbody>
+        @for (m of reciboVenta.lineas; track m.idMovimiento) {
+          <tr><td><b>{{ m.codigoProducto }}</b><br><small>{{ m.nombreProducto }}</small></td>
+          <td class="r">{{ m.cantidad }}</td><td class="r">{{ m.precioUnitario | soles }}</td>
+          <td class="r">{{ (m.precioUnitario != null ? m.cantidad * m.precioUnitario : null) | soles }}</td></tr>
+        }
+      </tbody>
+    </table>
+    <div class="total">Total: {{ reciboVenta.total | soles }}</div>
+    <div class="total">Ganancia: {{ gananciaLineas(reciboVenta.lineas) }}</div>
+  </app-drawer>
+}
+
+@if (reciboCompra) {
+  <app-drawer titulo="Compra N° {{ reciboCompra.idCompra }}" (cerrar)="reciboCompra = null">
+    <p class="mute">{{ reciboCompra.fechaHora | fechaCorta }}</p>
+    <table class="doct">
+      <thead><tr><th>Producto</th><th class="r">Cant.</th><th class="r">Costo</th><th class="r">Subtotal</th></tr></thead>
+      <tbody>
+        @for (m of reciboCompra.lineas; track m.idMovimiento) {
+          <tr><td><b>{{ m.codigoProducto }}</b><br><small>{{ m.nombreProducto }}</small></td>
+          <td class="r">{{ m.cantidad }}</td><td class="r">{{ m.costoUnitario | soles }}</td>
+          <td class="r">{{ (m.costoUnitario != null ? m.cantidad * m.costoUnitario : null) | soles }}</td></tr>
+        }
+      </tbody>
+    </table>
+    <div class="total">Total: {{ reciboCompra.total | soles }}</div>
+  </app-drawer>
+}

@@ -1,0 +1,44 @@
+:root {
+  --bg: #f1f3f6;
+  --card: #fff;
+  --ink: #1b2430;
+  --mute: #5d6b7c;
+  --line: #dde2e8;
+  --acc: #f2a20c;
+  --onacc: #1b2430;
+  --sel: #1b2430;
+  --onsel: #fff;
+  --ok: #157347;
+  --warn: #a65f00;
+  --bad: #b3261e;
+  --tint: #fff4dc;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12161c;
+    --card: #1b222b;
+    --ink: #eef1f4;
+    --mute: #9aa7b6;
+    --line: #2b3440;
+    --sel: #f2a20c;
+    --onsel: #1b2430;
+    --tint: #3a2d0c;
+    --ok: #5fd397;
+    --warn: #f4b64a;
+    --bad: #ff8a80;
+  }
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.4 "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; min-height: 48px; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--acc); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
