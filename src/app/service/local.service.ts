@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { apiUrl } from '../api-url';
 import { MensajeResponse } from '../model/mensaje-response';
 
 @Injectable({
@@ -9,7 +9,7 @@ import { MensajeResponse } from '../model/mensaje-response';
 })
 export class LocalService {
 
-  private baseURL = `${environment.API_URL}/ControladorLocal`;
+  private baseURL = `${apiUrl()}/ControladorLocal`;
 
   constructor(private http: HttpClient) { }
 

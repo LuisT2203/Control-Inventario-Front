@@ -1,5 +1,5 @@
 <div class="contenedor">
-  <h1>Kardex <small>{{ nombreLocal }}</small></h1>
+
 
   @if (error) {
     <div class="error">{{ error }}</div>
@@ -21,7 +21,7 @@
         @for (m of visibles; track m.idMovimiento) {
           <tr (click)="abrir(m)">
             <td class="nw">{{ m.fechaHora | fechaCorta }}</td>
-            <td><strong>{{ m.codigoProducto }}</strong><br><small>{{ m.nombreProducto }}</small></td>
+            <td><strong>{{ m.codigoProducto }}</strong><br><small>{{ m.nombreProducto }} {{ m.tallaProducto ?? '' }}</small></td>
             <td>{{ m.motivo ?? m.tipo }}</td>
             <td class="bien">{{ m.tipo === 'ENTRADA' || m.tipo === 'DEVOLUCION' ? m.cantidad : '' }}</td>
             <td class="mal">{{ m.tipo === 'SALIDA' ? m.cantidad : '' }}</td>
@@ -41,7 +41,7 @@
 
 @if (mov && !reciboVenta && !reciboCompra) {
   <app-drawer titulo="{{ mov.motivo ?? mov.tipo }}" (cerrar)="cerrarTodo()">
-    <p class="mute">{{ mov.codigoProducto }} · {{ mov.nombreProducto }}</p>
+    <p class="mute">{{ mov.codigoProducto }} · {{ mov.nombreProducto }} {{ mov.tallaProducto ?? '' }}</p>
     <div class="facts">
       <div><small>Fecha</small><b class="chica">{{ mov.fechaHora }}</b></div>
       <div><small>{{ mov.tipo === 'SALIDA' ? 'Salió' : 'Entró' }}</small><b>{{ mov.cantidad }} u.</b></div>
@@ -64,7 +64,7 @@
       <thead><tr><th>Producto</th><th class="r">Cant.</th><th class="r">Precio</th><th class="r">Subtotal</th></tr></thead>
       <tbody>
         @for (m of reciboVenta.lineas; track m.idMovimiento) {
-          <tr><td><b>{{ m.codigoProducto }}</b><br><small>{{ m.nombreProducto }}</small></td>
+          <tr><td><b>{{ m.codigoProducto }}</b><br><small>{{ m.nombreProducto }} {{ m.tallaProducto ?? '' }}</small></td>
           <td class="r">{{ m.cantidad }}</td><td class="r">{{ m.precioUnitario | soles }}</td>
           <td class="r">{{ (m.precioUnitario != null ? m.cantidad * m.precioUnitario : null) | soles }}</td></tr>
         }
@@ -82,7 +82,7 @@
       <thead><tr><th>Producto</th><th class="r">Cant.</th><th class="r">Costo</th><th class="r">Subtotal</th></tr></thead>
       <tbody>
         @for (m of reciboCompra.lineas; track m.idMovimiento) {
-          <tr><td><b>{{ m.codigoProducto }}</b><br><small>{{ m.nombreProducto }}</small></td>
+          <tr><td><b>{{ m.codigoProducto }}</b><br><small>{{ m.nombreProducto }} {{ m.tallaProducto ?? '' }}</small></td>
           <td class="r">{{ m.cantidad }}</td><td class="r">{{ m.costoUnitario | soles }}</td>
           <td class="r">{{ (m.costoUnitario != null ? m.cantidad * m.costoUnitario : null) | soles }}</td></tr>
         }

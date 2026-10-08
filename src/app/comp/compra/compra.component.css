@@ -13,19 +13,19 @@ h1 { font-size: 22px; }
 h2 { font-size: 18px; }
 .cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
 .cat {
-  min-height: 88px; text-align: left; border-radius: 14px; border: 2px solid var(--line);
-  background: var(--card); padding: 12px 14px; font-size: 1.05rem;
+  min-height: 88px; text-align: left; border-radius: 14px; border: 2px solid transparent;
+  background: var(--cc, var(--card)); color: #14213d; padding: 12px 14px; font-size: 1.05rem;
 }
 .cat:active { transform: scale(.98); }
-.cat small { display: block; color: var(--mute); }
+.cat small { display: block; color: #34425f; }
 .vuelta { display: flex; align-items: center; gap: 12px; }
 .vuelta button {
   min-height: 52px; border-radius: 12px; border: 2px solid var(--ink); background: var(--card);
   font-weight: 700; padding: 8px 14px;
 }
 .seg2 { display: inline-flex; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); padding: 3px; gap: 2px; }
-.seg2 button { border: 0; background: none; min-height: 42px; border-radius: 9px; color: var(--mute); font-weight: 700; padding: 0 14px; white-space: nowrap; }
-.seg2 button.on { background: var(--sel); color: var(--onsel); }
+.seg2 button { border: 0; background: var(--cc, none); min-height: 42px; border-radius: 9px; color: #14213d; font-weight: 700; padding: 0 14px; white-space: nowrap; }
+.seg2 button.on { outline: 2px solid #14213d; outline-offset: -2px; }
 .sc { max-width: 100%; overflow-x: auto; align-self: flex-start; }
 .rows { display: flex; flex-direction: column; gap: 8px; }
 .rw {
@@ -34,6 +34,8 @@ h2 { font-size: 18px; }
   padding: 10px 14px; font-size: 1.05rem; align-items: center;
 }
 .rw:active { transform: scale(.98); }
+.rw.elegido { border-color: var(--sel); box-shadow: inset 4px 0 0 var(--sel); }
+.tick { color: var(--sel); }
 .der { text-align: right; white-space: nowrap; }
 .ver-mas {
   min-height: 56px; border-radius: 14px; border: 2px solid var(--ink); background: var(--card);
@@ -68,6 +70,7 @@ button.grande {
   border-radius: 10px; border: 2px solid var(--ink); background: var(--card); color: var(--ink); margin-top: 12px;
 }
 button.grande.primario { background: var(--acc); border-color: var(--acc); color: var(--onacc); }
+button.grande:disabled { opacity: 0.6; }
 .total { font-size: 1.4rem; font-weight: 700; margin-top: 12px; display: flex; justify-content: space-between; }
 table.doct { width: 100%; border-collapse: collapse; margin-top: 8px; }
 table.doct th, table.doct td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }

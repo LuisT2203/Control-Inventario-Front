@@ -13,7 +13,7 @@ input {
   font-size: 1.05rem; border-radius: 12px; border: 2px solid var(--line); background: var(--card);
 }
 .tarjeta.tabla { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 8px; overflow: auto; }
-table { width: 100%; border-collapse: collapse; }
+table { width: 100%; min-width: 540px; border-collapse: collapse; }
 th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 th { color: var(--mute); font-size: 0.85rem; font-weight: 400; }
 tbody tr { cursor: pointer; }

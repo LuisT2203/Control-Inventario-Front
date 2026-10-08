@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { apiUrl } from '../api-url';
 import { AuthResponse } from '../model/auth';
 
 @Injectable({
@@ -9,7 +9,7 @@ import { AuthResponse } from '../model/auth';
 })
 export class AuthService {
 
-  private baseURL = `${environment.API_URL}/api/usuario`;
+  private baseURL = `${apiUrl()}/api/usuario`;
 
   constructor(private http: HttpClient) { }
 
@@ -33,6 +33,10 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!this.getToken();
+  }
+
+  hayRefresh(): boolean {
+    return !!this.getRefresh();
   }
 
   getToken(): string | null {

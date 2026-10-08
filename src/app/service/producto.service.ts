@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { apiUrl } from '../api-url';
 import { MensajeResponse } from '../model/mensaje-response';
 import { Producto } from '../model/producto';
 
@@ -10,7 +10,7 @@ import { Producto } from '../model/producto';
 })
 export class ProductoService {
 
-  private baseURL = `${environment.API_URL}/ControladorProducto`;
+  private baseURL = `${apiUrl()}/ControladorProducto`;
 
   constructor(private http: HttpClient) { }
 
@@ -41,6 +41,11 @@ export class ProductoService {
   conteoCategorias(localId: number): Observable<MensajeResponse> {
     const params = new HttpParams().set('localId', localId);
     return this.http.get<MensajeResponse>(`${this.baseURL}/contarCategorias`, { params });
+  }
+
+  siguienteCodigo(localId: number, categoria: string): Observable<MensajeResponse> {
+    const params = new HttpParams().set('localId', localId).set('categoria', categoria);
+    return this.http.get<MensajeResponse>(`${this.baseURL}/siguienteCodigo`, { params });
   }
 
   getProducto(id: number): Observable<Producto> {

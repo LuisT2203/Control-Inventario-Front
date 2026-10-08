@@ -1,0 +1,186 @@
+<div class="contenedor">
+  @if (vista !== 'menu') {
+    <button class="volver" (click)="volverMenu()">← Volver</button>
+  }
+
+  @if (vista === 'menu') {
+    <div class="dos">
+      <button class="grande rosa" (click)="irCambio()"><b>Cambio</b><small>Trae algo y se lleva otra cosa</small></button>
+      <button class="grande durazno" (click)="irDev()"><b>Devolución</b><small>Trae algo y no se lleva nada</small></button>
+    </div>
+    <h2>Últimos cambios y devoluciones</h2>
+    <div class="tarjeta">
+      @if (!historial.length) {
+        <p class="mute">Aún no hay cambios ni devoluciones.</p>
+      }
+      @for (c of historial; track c.idCambio) {
+        <button class="cambio" (click)="abrirRecibo(c.idCambio)">
+          <div><b>{{ c.tipo === 'CAMBIO' ? 'Cambio' : 'Devolución' }} N° {{ c.idCambio }}</b> <span class="mute">{{ c.fechaHora | fechaCorta }} · Venta N° {{ c.idVenta }}</span></div>
+          <div class="r">
+            @if (c.tipo === 'CAMBIO') {
+              {{ c.diferencia === null || c.diferencia === undefined ? 'Sin diferencia registrada' : c.diferencia === 0 ? 'Sin diferencia' : c.diferencia > 0 ? 'Pagó ' + (c.diferencia | soles) : 'Se devolvió ' + (-c.diferencia | soles) }}
+            } @else {
+              {{ c.montoDevuelto != null ? 'Se devolvió ' + (c.montoDevuelto | soles) : 'Sin monto' }}{{ c.vuelveStock ? '' : ' · no volvió al stock' }}
+            }
+          </div>
+        </button>
+      }
+    </div>
+  }
+
+  @if ((vista === 'cambio' || vista === 'dev') && paso === 0) {
+    <div class="pasos">
+      <span class="on">1. La venta</span>
+      <span>{{ vista === 'cambio' ? '2. Lo que trae' : '2. Lo que vuelve' }}</span>
+      <span>{{ vista === 'cambio' ? '3. Confirmar' : '3. Detalle' }}</span>
+    </div>
+    <h2>¿De qué venta viene?</h2>
+    <input [(ngModel)]="busVenta" name="busVenta" placeholder="Buscar por N° de venta" autocomplete="off" inputmode="numeric">
+    <div class="rows">
+      @if (!ventasFiltradas().length) {
+        <p class="mute">No hay ventas recientes. Vende primero y vuelve aquí.</p>
+      }
+      @for (v of ventasFiltradas(); track v.idVenta) {
+        <button class="rw venta" (click)="elegirVenta(v)">
+          <span><b>Venta N° {{ v.idVenta }}</b> <span class="mute">{{ v.fechaHora | fechaCorta }}</span>
+            <small class="lin">{{ lineasTexto(v) }}</small>
+          </span>
+          <span class="der">{{ v.total | soles }}</span>
+        </button>
+      }
+    </div>
+  }
+
+  @if (vista === 'cambio' && paso >= 1 && ventaSel) {
+    <div class="pasos">
+      <span>1. La venta</span>
+      <span [class.on]="paso === 1">2. Lo que trae</span>
+      <span [class.on]="paso === 2">3. Lo que se lleva</span>
+      <span [class.on]="paso === 3">4. Confirmar</span>
+    </div>
+    <p class="mute">Venta N° {{ ventaSel.idVenta }} · {{ ventaSel.total | soles }}</p>
+    @if (paso === 1) {
+      <h2>¿Qué trae el cliente? (de esta venta)</h2>
+      <div class="rows">
+        @for (l of lineasVenta(); track l.idMovimiento) {
+          <button class="rw" (click)="elegirEntra(l.idProducto)">
+            <span><b>{{ l.codigoProducto }}</b> {{ l.nombreProducto }} {{ l.tallaProducto ?? '' }}</span>
+            <span class="der">vendidas: {{ l.cantidad }}</span>
+          </button>
+        }
+      </div>
+    }
+    @if (paso === 2) {
+      <h2>¿Qué se lleva?</h2>
+      @if (otrasTallas().length) {
+        <h3>Otras tallas de {{ entra?.nombre }}</h3>
+        <div class="tallas">
+          @for (p of otrasTallas(); track p.idProducto) {
+            <button class="tal" [class.sin]="(p.stock ?? 0) <= 0" (click)="elegirSale(p.idProducto!)">
+              <b>{{ p.talla }}</b><small>{{ p.stock }} u.</small><em>{{ p.precioVenta != null ? (p.precioVenta | soles) : 'sin precio' }}</em>
+            </button>
+          }
+        </div>
+        <h3>O busca otra prenda</h3>
+      }
+      <input [(ngModel)]="texto" name="texto2" placeholder="Buscar por código o nombre" autocomplete="off">
+      <div class="rows">
+        @for (p of filtrados(); track p.idProducto) {
+          <button class="rw" (click)="elegirSale(p.idProducto!)">
+            <span><b>{{ p.codigo }}</b> {{ etiqueta(p) }}</span>
+            <span class="der">{{ p.stock }} u. · {{ p.precioVenta != null ? (p.precioVenta | soles) : 'sin precio' }}</span>
+          </button>
+        }
+      </div>
+    }
+    @if (paso === 3 && entra && sale) {
+      <div class="tarjeta resumen">
+        <div class="linea">
+          <div><small>Vuelve</small><div><b>{{ etiqueta(entra) }}</b></div><small>{{ entra.codigo }} · {{ entra.precioVenta != null ? (entra.precioVenta | soles) : 'sin precio' }} c/u</small></div>
+          <label>Cant.<input [(ngModel)]="cantEntra" name="cantEntra" type="number" min="0.01" step="0.01"></label>
+        </div>
+        <div class="linea">
+          <div><small>Se lleva</small><div><b>{{ etiqueta(sale) }}</b></div><small>{{ sale.codigo }} · {{ sale.precioVenta != null ? (sale.precioVenta | soles) : 'sin precio' }} c/u · quedan {{ sale.stock }}</small></div>
+          <label>Cant.<input [(ngModel)]="cantSale" name="cantSale" type="number" min="0.01" step="0.01"></label>
+        </div>
+        <div class="dif">{{ textoDiferencia() }}</div>
+        @if (error) {
+          <div class="error">{{ error }}</div>
+        }
+        <button class="grande primario" (click)="guardarCambio()" [disabled]="guardandoCambio">{{ guardandoCambio ? 'Guardando…' : 'Confirmar cambio' }}</button>
+        @if (ultimoTexto) {
+          <p class="ok">{{ ultimoTexto }}</p>
+        }
+      </div>
+    }
+  }
+
+  @if (vista === 'dev' && paso >= 1 && ventaSel) {
+    <div class="pasos">
+      <span>1. La venta</span>
+      <span [class.on]="paso === 1">2. Lo que vuelve</span>
+      <span [class.on]="paso === 2">3. Detalle</span>
+    </div>
+    <p class="mute">Venta N° {{ ventaSel.idVenta }} · {{ ventaSel.total | soles }}</p>
+    @if (paso === 1) {
+      <h2>¿Qué devuelve? Marca una o varias</h2>
+      <div class="rows">
+        @for (l of devLineas; track l.idProducto) {
+          <div class="rw dev">
+            <button class="chk" [class.on]="l.marca" (click)="l.marca = !l.marca; alMarcar()" aria-label="Marcar">{{ l.marca ? '✓' : '' }}</button>
+            <span class="crece"><b>{{ l.codigo }}</b> {{ l.nombre }} {{ l.talla ?? '' }}<br><small class="mute">vendidas: {{ l.compradas }}</small></span>
+            <label>Cant.<input [(ngModel)]="l.cantidad" name="cant{{ l.idProducto }}" type="number" min="0.01" step="0.01" (ngModelChange)="alMarcar()"></label>
+          </div>
+        }
+      </div>
+      <button class="grande primario" (click)="paso = 2">Seguir al detalle</button>
+    }
+    @if (paso === 2) {
+      <div class="tarjeta resumen">
+        <div><small>Vuelven</small>
+          @for (l of devLineas; track l.idProducto) {
+            @if (l.marca) {
+              <div><b>{{ l.codigo }}</b> {{ l.nombre }} {{ l.talla ?? '' }} ({{ l.cantidad }})</div>
+            }
+          }
+        </div>
+        <label>Motivo
+          <select [(ngModel)]="devMotivo" name="devMotivo" (ngModelChange)="motivoCambiado()">
+            @for (m of motivos; track m) {
+              <option [value]="m">{{ m }}</option>
+            }
+          </select>
+        </label>
+        <label>Monto que se devuelve (S/)
+          <input [(ngModel)]="devMonto" name="devMonto" type="number" min="0" step="0.01" placeholder="S/ {{ montoAuto().toFixed(2) }}">
+        </label>
+        <button class="sw" role="switch" [attr.aria-checked]="devStock" (click)="devStock = !devStock"><i></i>Vuelve al stock</button>
+        @if (errorDev) {
+          <div class="error">{{ errorDev }}</div>
+        }
+        <button class="grande primario" (click)="guardarDevolucion()" [disabled]="guardandoDev">{{ guardandoDev ? 'Guardando…' : 'Confirmar devolución' }}</button>
+      </div>
+    }
+  }
+</div>
+
+@if (recibo) {
+  <app-drawer titulo="{{ recibo.tipo === 'CAMBIO' ? 'Cambio' : 'Devolución' }} N° {{ recibo.idCambio }}" (cerrar)="recibo = null">
+    <p class="mute">{{ recibo.fechaHora | fechaCorta }} · Venta N° {{ recibo.idVenta }} · {{ recibo.motivo }}</p>
+    <table class="doct">
+      <thead><tr><th>Producto</th><th class="r">Cant.</th><th class="r">Precio</th></tr></thead>
+      <tbody>
+        @for (m of recibo.lineas; track m.idMovimiento) {
+          <tr><td><small>{{ m.tipo === 'DEVOLUCION' ? 'Vuelve' : m.tipo === 'ENTRADA' ? 'Vuelve' : 'Se lleva' }}</small><br><b>{{ m.codigoProducto }}</b> {{ m.nombreProducto }} {{ m.tallaProducto ?? '' }}</td>
+          <td class="r">{{ m.cantidad }}</td><td class="r">{{ m.precioUnitario | soles }}</td></tr>
+        }
+      </tbody>
+    </table>
+    @if (recibo.tipo === 'CAMBIO') {
+      <div class="total">{{ recibo.diferencia == null ? 'Sin diferencia registrada' : recibo.diferencia === 0 ? 'Sin diferencia' : recibo.diferencia > 0 ? 'El cliente pagó ' + (recibo.diferencia | soles) : 'Se devolvieron ' + (-recibo.diferencia | soles) }}</div>
+    } @else {
+      <div class="total">{{ recibo.montoDevuelto != null ? 'Se devolvieron ' + (recibo.montoDevuelto | soles) : 'Sin monto registrado' }}</div>
+      <div class="mute">{{ recibo.vuelveStock ? 'Volvió al stock.' : 'No volvió al stock (prenda con falla).' }}</div>
+    }
+  </app-drawer>
+}

@@ -1,21 +1,32 @@
 <div class="app">
   @if (dentro) {
     <nav>
-      <div class="brand">Kardex</div>
+      <button class="brand" [routerLink]="['/locales']" aria-label="Volver a elegir tienda">
+        <app-emblema [codigo]="tiendaActual?.codigo ?? ''" [tam]="40"></app-emblema>
+        <span>{{ nombreTienda || 'Kardex' }}</span>
+      </button>
       <div class="seg">
+        <small>Tienda</small>
         @for (l of locales; track l.idLocal) {
           <button [class.on]="l.idLocal === idLocal" (click)="irTienda(l.idLocal!)">{{ l.nombre }}</button>
         }
       </div>
-      <a [routerLink]="['/inicio', idLocal]" routerLinkActive="on">Inicio</a>
-      <a [routerLink]="['/venta', idLocal]" routerLinkActive="on">Vender</a>
-      <a [routerLink]="['/compra', idLocal]" routerLinkActive="on">Comprar</a>
-      <a [routerLink]="['/productos', idLocal]" routerLinkActive="on">Productos</a>
-      <a [routerLink]="['/kardex-local', idLocal]" routerLinkActive="on">Kardex</a>
+      <a class="m-inicio" [routerLink]="['/inicio', idLocal]" routerLinkActive="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><span>Inicio</span></a>
+      <a class="m-vender" [routerLink]="['/venta', idLocal]" routerLinkActive="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.5 11h10.5l2-8H6.5M9 20h.01M17 20h.01"/></svg><span>Vender</span></a>
+      <a class="m-comprar" [routerLink]="['/compra', idLocal]" routerLinkActive="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v10m0 0l-4-4m4 4l4-4M4 17v4h16v-4"/></svg><span>Comprar</span></a>
+      <a class="m-cambios" [routerLink]="['/cambios', idLocal]" routerLinkActive="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8h13l-3-3M17 16H4l3 3"/></svg><span>Cambios y devoluciones</span></a>
+      <a class="m-productos" [routerLink]="['/productos', idLocal]" routerLinkActive="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5v8l-9 5-9-5V8zM3 8l9 5 9-5M12 13v8"/></svg><span>Productos</span></a>
+      <a class="m-kardex" [routerLink]="['/kardex-local', idLocal]" routerLinkActive="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Kardex</span></a>
       <button class="salir" (click)="salir()">{{ auth.getUsuario() }} · Salir</button>
     </nav>
   }
   <div class="content">
+    @if (verCabecera) {
+      <header class="tienda">
+        <app-emblema [codigo]="tiendaActual?.codigo ?? ''" [tam]="44"></app-emblema>
+        <div><h1>{{ titulo }}</h1><span class="sub">{{ subTienda }}</span></div>
+      </header>
+    }
     <main>
       <router-outlet></router-outlet>
     </main>

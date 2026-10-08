@@ -11,6 +11,7 @@ import { FechaCortaPipe } from '../../pipes/fecha-corta.pipe';
 import { SolesPipe } from '../../pipes/soles.pipe';
 import { ProductoService } from '../../service/producto.service';
 import { ToastService } from '../../service/toast.service';
+import { COLOR_TODAS, colorCategoria } from '../../tema-tienda';
 import { DrawerComponent } from '../drawer/drawer.component';
 
 interface Linea {
@@ -106,7 +107,7 @@ export class CompraComponent implements OnInit, OnDestroy {
         const r = resp.object as { items: Producto[]; total: number };
         const items = r.items ?? [];
         this.totalCoinciden = r.total ?? 0;
-        this.resultados = items.filter(p => !this.lineas.some(l => l.producto.idProducto === p.idProducto));
+        this.resultados = items;
         this.limite = 20;
       },
       error: () => {
@@ -129,13 +130,29 @@ export class CompraComponent implements OnInit, OnDestroy {
   }
 
   agregar(p: Producto): void {
+    const existente = this.lineas.find(l => l.producto.idProducto === p.idProducto);
+    if (existente) {
+      existente.cantidad = existente.cantidad + 1;
+      return;
+    }
     this.lineas.push({ producto: p, cantidad: 1, costo: p.costoReferencia ?? null });
-    this.resultados = this.resultados.filter(x => x.idProducto !== p.idProducto);
+  }
+
+  enCarrito(p: Producto): boolean {
+    return this.lineas.some(l => l.producto.idProducto === p.idProducto);
+  }
+
+  todas = COLOR_TODAS;
+
+  colorCat(i: number): string {
+    return colorCategoria(this.exigeTalla, i);
   }
 
   quitar(i: number): void {
     this.lineas.splice(i, 1);
   }
+
+  guardando = false;
 
   confirmar(): void {
     this.error = '';
@@ -143,6 +160,10 @@ export class CompraComponent implements OnInit, OnDestroy {
       this.error = 'Agrega productos a la compra.';
       return;
     }
+    if (this.guardando) {
+      return;
+    }
+    this.guardando = true;
     const cuerpo = this.lineas.map(l => ({
       idProducto: l.producto.idProducto!,
       cantidad: l.cantidad,
@@ -150,6 +171,7 @@ export class CompraComponent implements OnInit, OnDestroy {
     }));
     this.movimientosService.guardarCompra(cuerpo, this.motivo.trim() || undefined).subscribe({
       next: (resp: MensajeResponse) => {
+        this.guardando = false;
         this.recibo = resp.object as ReciboCompra;
         this.lineas = [];
         this.motivo = '';
@@ -157,6 +179,7 @@ export class CompraComponent implements OnInit, OnDestroy {
         this.toast.mostrar(`Compra N° ${this.recibo.idCompra} registrada`);
       },
       error: (e) => {
+        this.guardando = false;
         const err = e as { error?: MensajeResponse | string };
         this.error = typeof err?.error === 'string' ? err.error : err?.error?.mensaje ?? 'No se pudo guardar la compra.';
       }

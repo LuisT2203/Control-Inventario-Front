@@ -10,6 +10,7 @@ import { FechaCortaPipe } from '../../pipes/fecha-corta.pipe';
 import { MovimientoService } from '../../service/movimiento.service';
 import { ProductoService } from '../../service/producto.service';
 import { ToastService } from '../../service/toast.service';
+import { COLOR_TODAS, colorCategoria } from '../../tema-tienda';
 import { SolesPipe } from '../../pipes/soles.pipe';
 import { DrawerComponent } from '../drawer/drawer.component';
 
@@ -217,6 +218,12 @@ export class ProductosComponent implements OnInit, OnDestroy {
     this.cargar();
   }
 
+  todas = COLOR_TODAS;
+
+  colorCat(i: number): string {
+    return colorCategoria(this.exigeTalla, i);
+  }
+
   alternarSinStock(): void {
     this.soloSinStock = !this.soloSinStock;
     this.cargar();
@@ -289,20 +296,25 @@ export class ProductosComponent implements OnInit, OnDestroy {
     return { texto: `S/ ${g.toFixed(2)}${pct}`, mala: g < 0 };
   }
 
+  guardandoPrecio = false;
+
   guardarPrecioCosto(): void {
     this.errorPrecio = '';
     this.avisoPrecio = '';
-    if (!this.ficha?.producto.idProducto) {
+    if (!this.ficha?.producto.idProducto || this.guardandoPrecio) {
       return;
     }
+    this.guardandoPrecio = true;
     const id = this.ficha.producto.idProducto;
     this.productosService.actualizarPrecioCosto(id, this.nuevoPrecio, this.nuevoCosto).subscribe({
       next: () => {
+        this.guardandoPrecio = false;
         this.cargar();
         this.abrirFicha({ idProducto: id } as Producto);
         this.toast.mostrar('Guardado');
       },
       error: (e) => {
+        this.guardandoPrecio = false;
         this.errorPrecio = this.mensajeError(e);
       }
     });
@@ -353,37 +365,71 @@ export class ProductosComponent implements OnInit, OnDestroy {
     }
   }
 
+  guardandoPrenda = false;
+
   guardarPrenda(): void {
     this.errorPrenda = '';
     this.avisoPrenda = '';
-    if (!this.prenda) {
+    if (!this.prenda || this.guardandoPrenda) {
       return;
     }
+    this.guardandoPrenda = true;
     const lineas = this.prenda
       .filter(t => t.precio != null || t.costo != null)
       .map(t => ({ idProducto: t.id, precioVenta: t.precio, costoReferencia: t.costo }));
     if (!lineas.length) {
+      this.guardandoPrenda = false;
       this.errorPrenda = 'No hay precios que guardar.';
       return;
     }
     this.productosService.actualizarPreciosCostos(lineas).subscribe({
       next: () => {
+        this.guardandoPrenda = false;
         const bajos = this.prenda!.filter(t => t.precio != null && t.costo != null && t.precio < t.costo).length;
         this.cerrarPrenda();
         this.cargar();
         this.toast.mostrar(bajos ? `Precios guardados. Ojo: ${bajos} con precio menor que el costo.` : 'Precios guardados');
       },
       error: (e) => {
+        this.guardandoPrenda = false;
         this.errorPrenda = this.mensajeError(e);
       }
     });
   }
 
+  catSel = '';
+  nuevaCat = '';
+  guardandoFicha = false;
+
   nuevaFicha(): void {
     this.editandoId = null;
     this.form = { codigo: '', nombre: '', unidad: 'UND', activo: true };
+    this.catSel = '';
+    this.nuevaCat = '';
     this.mostrandoFormulario = true;
     this.aviso = '';
+  }
+
+  elegirCategoriaForm(): void {
+    if (this.catSel === '__NUEVA__') {
+      this.form.tipo = '';
+      return;
+    }
+    this.form.tipo = this.catSel || null;
+    if (!this.editandoId && this.catSel) {
+      if (!this.form.nombre?.trim()) {
+        this.form.nombre = this.catSel;
+      }
+      this.productosService.siguienteCodigo(this.idLocal, this.catSel).subscribe({
+        next: (resp: MensajeResponse) => {
+          const s = resp.object as { codigo?: string | null };
+          if (s?.codigo) {
+            this.form.codigo = s.codigo;
+          }
+        },
+        error: () => undefined
+      });
+    }
   }
 
   editarDesdeFicha(): void {
@@ -395,6 +441,11 @@ export class ProductosComponent implements OnInit, OnDestroy {
       next: (llena) => {
         this.editandoId = llena.idProducto ?? null;
         this.form = { ...llena, stockInicial: null };
+        this.nuevaCat = '';
+        this.catSel = (llena.tipo && this.categorias.includes(llena.tipo)) ? llena.tipo : '__NUEVA__';
+        if (this.catSel === '__NUEVA__') {
+          this.nuevaCat = llena.tipo ?? '';
+        }
         this.mostrandoFormulario = true;
         this.ficha = null;
       },
@@ -406,17 +457,31 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
   guardar(): void {
     this.error = '';
+    if (this.catSel === '__NUEVA__') {
+      this.form.tipo = this.nuevaCat.trim() || null;
+    }
+    if (!this.form.tipo?.trim()) {
+      this.error = 'Elige la categoría primero.';
+      return;
+    }
+    if (this.guardandoFicha) {
+      return;
+    }
+    this.guardandoFicha = true;
     this.form.idLocal = this.idLocal;
     const llamada = this.editandoId
       ? this.productosService.actualizar({ ...this.form, idProducto: this.editandoId })
       : this.productosService.guardar(this.form);
     llamada.subscribe({
       next: (resp) => {
+        this.guardandoFicha = false;
         this.aviso = resp.mensaje;
+        this.toast.mostrar(resp.mensaje);
         this.mostrandoFormulario = false;
         this.cargar();
       },
       error: (e) => {
+        this.guardandoFicha = false;
         this.error = this.mensajeError(e);
       }
     });

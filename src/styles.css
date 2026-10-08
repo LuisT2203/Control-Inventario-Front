@@ -12,21 +12,39 @@
   --warn: #a65f00;
   --bad: #b3261e;
   --tint: #fff4dc;
+  --azul-noche: #14213d;
+  --azul-noche-2: #1e2c5c;
+  --noche-ink: #eaf0ff;
+  --noche-mute: #9fb0d8;
+  --pastel-inicio: #cfe3ff;
+  --pastel-vender: #cdefd9;
+  --pastel-comprar: #fff0b8;
+  --pastel-cambios: #ffd3e1;
+  --pastel-productos: #e0d6ff;
+  --pastel-kardex: #ffddc2;
+  --pastel-inicio-suave: #cfe3ff2e;
+  --pastel-vender-suave: #cdefd92e;
+  --pastel-comprar-suave: #fff0b82e;
+  --pastel-cambios-suave: #ffd3e12e;
+  --pastel-productos-suave: #e0d6ff2e;
+  --pastel-kardex-suave: #ffddc22e;
+  --todas: #e7ecf5;
+  --banner: #e6ebf2;
+  --tacc: #f2a20c;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #12161c;
-    --card: #1b222b;
-    --ink: #eef1f4;
-    --mute: #9aa7b6;
-    --line: #2b3440;
-    --sel: #f2a20c;
-    --onsel: #1b2430;
-    --tint: #3a2d0c;
-    --ok: #5fd397;
-    --warn: #f4b64a;
-    --bad: #ff8a80;
-  }
+body[data-tienda="RELIGIOSOS"] {
+  --bg: #f2f6ff;
+  --banner: #dce8ff;
+  --tacc: #c9a24b;
+  --tb: #dce8ff;
+  --ta: #c7daff;
+}
+body[data-tienda="UNIFORMES"] {
+  --bg: #fff8ec;
+  --banner: #d6f2e2;
+  --tacc: #f28b6e;
+  --tb: #d6f2e2;
+  --ta: #bfe8d1;
 }
 * { box-sizing: border-box; }
 html, body { height: 100%; }
@@ -39,6 +57,24 @@ body {
 button, input, select { font: inherit; color: inherit; }
 button { cursor: pointer; min-height: 48px; }
 button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--acc); outline-offset: 2px; }
+.noche {
+  min-height: 100vh;
+  background:
+    radial-gradient(2px 2px at 12% 18%, #fff 60%, transparent 61%),
+    radial-gradient(2px 2px at 78% 8%, #fff 60%, transparent 61%),
+    radial-gradient(3px 3px at 88% 62%, #cdd8ff 60%, transparent 61%),
+    radial-gradient(2px 2px at 64% 88%, #fff 60%, transparent 61%),
+    radial-gradient(2px 2px at 32% 74%, #cdd8ff 60%, transparent 61%),
+    radial-gradient(3px 3px at 8% 52%, #fff 60%, transparent 61%),
+    radial-gradient(2px 2px at 45% 32%, #fff 60%, transparent 61%),
+    radial-gradient(2px 2px at 92% 30%, #fff 60%, transparent 61%),
+    radial-gradient(340px 340px at 85% 110%, #24377a 0%, transparent 70%),
+    radial-gradient(420px 420px at 8% -10%, #24377a 0%, transparent 70%),
+    linear-gradient(180deg, var(--azul-noche-2), var(--azul-noche));
+}
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
+}
+@media (max-width: 560px) {
+  .contenedor { padding-left: 12px; padding-right: 12px; }
 }

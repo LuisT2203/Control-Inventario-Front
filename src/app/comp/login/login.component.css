@@ -5,6 +5,8 @@
   justify-content: center;
   padding: 16px;
 }
+.pantalla.noche { min-height: 100vh; min-height: 100dvh; position: relative; overflow: hidden; }
+.pantalla.noche .tarjeta { position: relative; }
 .tarjeta {
   width: 100%;
   max-width: 420px;
@@ -15,8 +17,8 @@
 }
 .marca {
   display: inline-block;
-  background: var(--sel);
-  color: var(--onsel);
+  background: var(--azul-noche);
+  color: #fff;
   font-weight: 700;
   padding: 4px 12px;
   border-radius: 999px;
@@ -50,7 +52,7 @@ button.grande {
   font-weight: 700;
   border: none;
   border-radius: 10px;
-  background: var(--acc);
-  color: var(--onacc);
+  background: var(--azul-noche);
+  color: #fff;
 }
 button.grande:disabled { opacity: 0.6; }

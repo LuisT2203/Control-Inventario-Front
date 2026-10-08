@@ -1,16 +1,16 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { apiUrl } from '../api-url';
 import { MensajeResponse } from '../model/mensaje-response';
-import { Cambio, Movimiento, ReciboCompra, ReciboVenta } from '../model/movimiento';
+import { Cambio, Devolucion, Movimiento, ReciboCambio, ReciboCompra, ReciboVenta, VentaResumen } from '../model/movimiento';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MovimientoService {
 
-  private baseURL = `${environment.API_URL}/ControladorMovimiento`;
+  private baseURL = `${apiUrl()}/ControladorMovimiento`;
 
   constructor(private http: HttpClient) { }
 
@@ -20,6 +20,24 @@ export class MovimientoService {
 
   guardarCambio(c: Cambio): Observable<MensajeResponse> {
     return this.http.post<MensajeResponse>(`${this.baseURL}/saveCambio`, c);
+  }
+
+  guardarDevolucion(d: Devolucion): Observable<MensajeResponse> {
+    return this.http.post<MensajeResponse>(`${this.baseURL}/saveDevolucion`, d);
+  }
+
+  verCambio(id: number): Observable<ReciboCambio> {
+    return this.http.get<ReciboCambio>(`${this.baseURL}/cambio/${id}`);
+  }
+
+  listarCambios(localId: number, dias = 30): Observable<MensajeResponse> {
+    const params = new HttpParams().set('localId', localId).set('dias', dias);
+    return this.http.get<MensajeResponse>(`${this.baseURL}/listarCambios`, { params });
+  }
+
+  listarVentas(localId: number, dias = 30): Observable<MensajeResponse> {
+    const params = new HttpParams().set('localId', localId).set('dias', dias);
+    return this.http.get<MensajeResponse>(`${this.baseURL}/listarVentas`, { params });
   }
 
   guardarVenta(lineas: { idProducto: number; cantidad: number }[]): Observable<MensajeResponse> {

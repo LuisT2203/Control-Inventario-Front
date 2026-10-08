@@ -1,5 +1,5 @@
 <div class="contenedor">
-  <h1>Comprar <small>{{ nombreLocal }}</small></h1>
+
 
   @if (error) {
     <div class="error">{{ error }}</div>
@@ -10,10 +10,10 @@
       <input [(ngModel)]="texto" name="texto" (ngModelChange)="alBuscar()" placeholder="Buscar por código o nombre">
       @if (!texto.trim() && exigeTalla && !categoria) {
         <div class="cats">
-          @for (c of conteos; track c.tipo) {
-            <button class="cat" (click)="elegirCategoria(c.tipo)">
+          @for (c of conteos; track c.tipo; let i = $index) {
+            <button class="cat" [style.--cc]="colorCat(i)" (click)="elegirCategoria(c.tipo)">
               <b>{{ c.tipo }}</b>
-              <small>{{ c.fichas }} opciones · {{ c.unidades }} u.</small>
+              <small>{{ c.fichas }} {{ c.fichas === 1 ? 'opción' : 'opciones' }} · {{ c.unidades }} u.</small>
             </button>
           }
         </div>
@@ -26,16 +26,16 @@
         }
         @if (!exigeTalla && !texto.trim()) {
           <div class="seg2 sc" role="group" aria-label="Categoría">
-            <button [class.on]="categoria === ''" (click)="elegirCategoria('')">Todo</button>
-            @for (c of categorias; track c) {
-              <button [class.on]="categoria === c" (click)="elegirCategoria(c)">{{ c }}</button>
+            <button [class.on]="categoria === ''" [style.--cc]="todas" (click)="elegirCategoria('')">Todo</button>
+            @for (c of categorias; track c; let i = $index) {
+              <button [class.on]="categoria === c" [style.--cc]="colorCat(i)" (click)="elegirCategoria(c)">{{ c }}</button>
             }
           </div>
         }
         <div class="rows">
           @for (p of visibles; track p.idProducto) {
-            <button class="rw" (click)="agregar(p)">
-              <span><b>{{ p.codigo }}</b> {{ p.nombre }} {{ p.talla ?? '' }}</span>
+            <button class="rw" [class.elegido]="enCarrito(p)" (click)="agregar(p)">
+              <span>@if (enCarrito(p)) {<b class="tick">✓ </b>}<b>{{ p.codigo }}</b> {{ p.nombre }} {{ p.talla ?? '' }}</span>
               <span class="der">{{ p.stock }} u. · {{ p.costoReferencia != null ? 'S/ ' + p.costoReferencia : 'sin costo' }}</span>
             </button>
           }
@@ -54,7 +54,7 @@
       @for (l of lineas; track l.producto.idProducto; let i = $index) {
         <div class="crow">
           <div>
-            <b>{{ l.producto.codigo }}</b> {{ l.producto.nombre }}
+            <b>{{ l.producto.codigo }}</b> {{ l.producto.nombre }} {{ l.producto.talla ?? '' }}
             <label class="costo">Costo c/u
               <input [(ngModel)]="l.costo" name="costo{{i}}" type="number" min="0" step="0.01">
             </label>
@@ -70,7 +70,7 @@
       <label>Motivo (opcional)
         <input [(ngModel)]="motivo" name="motivo" placeholder="Compra proveedor">
       </label>
-      <button class="grande primario" (click)="confirmar()">Confirmar compra</button>
+      <button class="grande primario" (click)="confirmar()" [disabled]="guardando">{{ guardando ? 'Guardando…' : 'Confirmar compra' }}</button>
     </aside>
   </div>
 </div>
@@ -82,7 +82,7 @@
       <thead><tr><th>Producto</th><th class="r">Cant.</th><th class="r">Costo</th><th class="r">Subtotal</th></tr></thead>
       <tbody>
         @for (m of recibo.lineas; track m.idMovimiento) {
-          <tr><td><b>{{ m.codigoProducto }}</b><br><small>{{ m.nombreProducto }}</small></td>
+          <tr><td><b>{{ m.codigoProducto }}</b><br><small>{{ m.nombreProducto }} {{ m.tallaProducto ?? '' }}</small></td>
           <td class="r">{{ m.cantidad }}</td><td class="r">{{ m.costoUnitario | soles }}</td>
           <td class="r">{{ (m.costoUnitario != null ? m.cantidad * m.costoUnitario : null) | soles }}</td></tr>
         }

@@ -1,5 +1,5 @@
 <div class="contenedor">
-  <h1>Productos <small>{{ nombreLocal }}</small></h1>
+
 
   @if (error) {
     <div class="error">{{ error }}</div>
@@ -12,11 +12,11 @@
     <aside class="rail tarjeta" aria-label="Categorías">
       <h3>Categorías</h3>
       <p class="leg"><span class="dot"></span> Hay productos sin stock</p>
-      <button class="ri" [class.on]="categoria === ''" (click)="elegirCategoria('')">
+      <button class="ri" [class.on]="categoria === ''" [style.--cc]="todas" (click)="elegirCategoria('')">
         <span>Todas</span><small>{{ totalCoinciden }}</small>
       </button>
-      @for (c of conteos; track c.tipo) {
-        <button class="ri" [class.on]="categoria === c.tipo" (click)="elegirCategoria(c.tipo)">
+      @for (c of conteos; track c.tipo; let i = $index) {
+        <button class="ri" [class.on]="categoria === c.tipo" [style.--cc]="colorCat(i)" (click)="elegirCategoria(c.tipo)">
           <span>{{ c.tipo }}</span>
           <small>@if (c.sinStock) {<span class="dot" role="img" aria-label="hay productos sin stock"></span>}{{ c.fichas }}</small>
         </button>
@@ -46,14 +46,25 @@
   @if (mostrandoFormulario) {
     <div class="tarjeta">
       <h2>{{ editandoId ? 'Editar producto' : 'Nuevo producto' }}</h2>
-      <label>Código
-        <input [(ngModel)]="form.codigo" name="codigo" placeholder="CHOMPA-8">
+      <label>Categoría (primero)
+        <select [(ngModel)]="catSel" name="catSel" (ngModelChange)="elegirCategoriaForm()">
+          <option value="">Elige…</option>
+          @for (c of categorias; track c) {
+            <option [value]="c">{{ c }}</option>
+          }
+          <option value="__NUEVA__">+ Nueva categoría…</option>
+        </select>
+      </label>
+      @if (catSel === '__NUEVA__') {
+        <label>Nueva categoría
+          <input [(ngModel)]="nuevaCat" name="nuevaCat" placeholder="Escribe el nombre exacto">
+        </label>
+      }
+      <label>Código (se propone solo)
+        <input [(ngModel)]="form.codigo" name="codigo" placeholder="Se completa al elegir categoría">
       </label>
       <label>Nombre
         <input [(ngModel)]="form.nombre" name="nombre" placeholder="Chompa">
-      </label>
-      <label>Categoría
-        <input [(ngModel)]="form.tipo" name="tipo" placeholder="Blusas, Medallas, Vestuario…">
       </label>
       @if (exigeTalla) {
         <label>Talla
@@ -71,15 +82,15 @@
         </select>
       </label>
       @if (!editandoId) {
-        <label>Stock inicial
+        <label>Stock inicial <small class="pista">Lo que ya tienes en tienda (0 si es nuevo)</small>
           <input [(ngModel)]="form.stockInicial" name="stockInicial" type="number" min="0" step="0.01">
         </label>
       }
-      <label>Stock mínimo
+      <label>Stock mínimo <small class="pista">Avísame cuando baje de esta cantidad</small>
         <input [(ngModel)]="form.stockMinimo" name="stockMinimo" type="number" min="0" step="0.01">
       </label>
       <div class="fila">
-        <button class="grande primario" (click)="guardar()">Guardar</button>
+        <button class="grande primario" (click)="guardar()" [disabled]="guardandoFicha">{{ guardandoFicha ? 'Guardando…' : 'Guardar' }}</button>
         <button class="grande" (click)="mostrandoFormulario = false">Cerrar</button>
       </div>
     </div>
@@ -110,11 +121,12 @@
   } @else {
     <div class="tarjeta tabla desplaza">
       <table class="costos">
-        <thead><tr><th class="fija">Código</th><th>Stock</th><th>Costo</th><th>Precio</th><th>Costo total</th><th>Valor en stock</th><th>Ganancia</th><th>% s/ costo</th></tr></thead>
+        <thead><tr><th class="fija">Código</th><th>Producto</th><th>Stock</th><th>Costo</th><th>Precio</th><th>Costo total</th><th>Valor en stock</th><th>Ganancia</th><th>% s/ costo</th></tr></thead>
         <tbody>
           @for (p of baseCostos; track p.idProducto) {
             <tr (click)="abrirFicha(p)">
               <td class="fija nw"><b>{{ p.codigo }}</b></td>
+              <td>{{ p.nombre }} {{ p.talla ?? p.detalle ?? '' }}</td>
               <td>{{ p.stock }}</td>
               <td class="nw">{{ p.costoReferencia | soles }}</td>
               <td class="nw">{{ p.precioVenta | soles }}</td>
@@ -125,7 +137,7 @@
             </tr>
           }
         </tbody>
-        <tfoot><tr><td class="fija"><b>Total</b></td><td></td><td></td><td></td>
+        <tfoot><tr><td class="fija"><b>Total</b></td><td></td><td></td><td></td><td></td>
         <td class="nw"><b>{{ sumaCostoTotal | soles }}</b></td><td class="nw"><b>{{ sumaValorStock | soles }}</b></td>
         <td class="nw"><b>{{ sumaGanancia | soles }}</b></td><td></td></tr></tfoot>
       </table>
@@ -163,7 +175,7 @@
     @if (avisoPrecio) {
       <div class="aviso">{{ avisoPrecio }}</div>
     }
-    <button class="grande primario" (click)="guardarPrecioCosto()">Guardar</button>
+    <button class="grande primario" (click)="guardarPrecioCosto()" [disabled]="guardandoPrecio">{{ guardandoPrecio ? 'Guardando…' : 'Guardar' }}</button>
     <h3>Movimientos</h3>
     @for (m of ficha.movimientos; track m.idMovimiento) {
       <button class="mov" (click)="abrirDoc(m)">
@@ -209,7 +221,7 @@
     @if (avisoPrenda) {
       <div class="aviso">{{ avisoPrenda }}</div>
     }
-    <button class="grande primario" (click)="guardarPrenda()">Guardar precios</button>
+    <button class="grande primario" (click)="guardarPrenda()" [disabled]="guardandoPrenda">{{ guardandoPrenda ? 'Guardando…' : 'Guardar precios' }}</button>
   </app-drawer>
 }
 
@@ -220,7 +232,7 @@
       <thead><tr><th>Producto</th><th class="r">Cant.</th><th class="r">Precio</th><th class="r">Subtotal</th></tr></thead>
       <tbody>
         @for (m of reciboVenta.lineas; track m.idMovimiento) {
-          <tr><td><b>{{ m.codigoProducto }}</b><br><small>{{ m.nombreProducto }}</small></td>
+          <tr><td><b>{{ m.codigoProducto }}</b><br><small>{{ m.nombreProducto }} {{ m.tallaProducto ?? '' }}</small></td>
           <td class="r">{{ m.cantidad }}</td><td class="r">{{ m.precioUnitario | soles }}</td>
           <td class="r">{{ (m.precioUnitario != null ? m.cantidad * m.precioUnitario : null) | soles }}</td></tr>
         }
@@ -238,7 +250,7 @@
       <thead><tr><th>Producto</th><th class="r">Cant.</th><th class="r">Costo</th><th class="r">Subtotal</th></tr></thead>
       <tbody>
         @for (m of reciboCompra.lineas; track m.idMovimiento) {
-          <tr><td><b>{{ m.codigoProducto }}</b><br><small>{{ m.nombreProducto }}</small></td>
+          <tr><td><b>{{ m.codigoProducto }}</b><br><small>{{ m.nombreProducto }} {{ m.tallaProducto ?? '' }}</small></td>
           <td class="r">{{ m.cantidad }}</td><td class="r">{{ m.costoUnitario | soles }}</td>
           <td class="r">{{ (m.costoUnitario != null ? m.cantidad * m.costoUnitario : null) | soles }}</td></tr>
         }

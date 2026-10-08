@@ -11,6 +11,7 @@ import { ProductoService } from '../../service/producto.service';
 import { FechaCortaPipe } from '../../pipes/fecha-corta.pipe';
 import { SolesPipe } from '../../pipes/soles.pipe';
 import { ToastService } from '../../service/toast.service';
+import { COLOR_TODAS, colorCategoria } from '../../tema-tienda';
 import { DrawerComponent } from '../drawer/drawer.component';
 
 interface Linea {
@@ -104,7 +105,7 @@ export class VentaComponent implements OnInit, OnDestroy {
         const r = resp.object as { items: Producto[]; total: number };
         const items = r.items ?? [];
         this.totalCoinciden = r.total ?? 0;
-        this.resultados = items.filter(p => !this.lineas.some(l => l.producto.idProducto === p.idProducto));
+        this.resultados = items;
         this.limite = 20;
       },
       error: () => {
@@ -127,8 +128,23 @@ export class VentaComponent implements OnInit, OnDestroy {
   }
 
   agregar(p: Producto): void {
+    const existente = this.lineas.find(l => l.producto.idProducto === p.idProducto);
+    if (existente) {
+      const stock = p.stock ?? 0;
+      existente.cantidad = stock > 0 ? Math.min(existente.cantidad + 1, stock) : existente.cantidad + 1;
+      return;
+    }
     this.lineas.push({ producto: p, cantidad: 1, precio: p.precioVenta ?? null });
-    this.resultados = this.resultados.filter(x => x.idProducto !== p.idProducto);
+  }
+
+  enCarrito(p: Producto): boolean {
+    return this.lineas.some(l => l.producto.idProducto === p.idProducto);
+  }
+
+  todas = COLOR_TODAS;
+
+  colorCat(i: number): string {
+    return colorCategoria(this.exigeTalla, i);
   }
 
   quitar(i: number): void {
@@ -138,6 +154,8 @@ export class VentaComponent implements OnInit, OnDestroy {
   get faltaPrecio(): boolean {
     return this.lineas.some(l => l.producto.precioVenta == null && !(l.precio != null && l.precio >= 0));
   }
+
+  guardando = false;
 
   confirmar(): void {
     this.error = '';
@@ -149,6 +167,10 @@ export class VentaComponent implements OnInit, OnDestroy {
       this.error = 'Falta el precio en una línea: escríbelo antes de confirmar.';
       return;
     }
+    if (this.guardando) {
+      return;
+    }
+    this.guardando = true;
     const cuerpo = this.lineas.map(l => ({
       idProducto: l.producto.idProducto!,
       cantidad: l.cantidad,
@@ -156,12 +178,14 @@ export class VentaComponent implements OnInit, OnDestroy {
     }));
     this.movimientosService.guardarVenta(cuerpo).subscribe({
       next: (resp: MensajeResponse) => {
+        this.guardando = false;
         this.recibo = resp.object as ReciboVenta;
         this.lineas = [];
         this.buscar();
         this.toast.mostrar(`Venta N° ${this.recibo.idVenta} registrada`);
       },
       error: (e) => {
+        this.guardando = false;
         const err = e as { error?: MensajeResponse | string };
         this.error = typeof err?.error === 'string' ? err.error : err?.error?.mensaje ?? 'No se pudo guardar la venta.';
       }

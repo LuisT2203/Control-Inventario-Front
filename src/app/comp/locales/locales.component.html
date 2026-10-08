@@ -1,23 +1,30 @@
-<div class="contenedor">
-  <h1>¿Qué local abres?</h1>
-  @if (error) {
-    <div class="error">{{ error }}</div>
-  }
-  <div class="grilla">
-    @for (local of locales; track local.idLocal) {
-      <div class="local">
-        <span class="nombre">{{ local.nombre }}</span>
-        <span class="detalle">{{ local.exigeTalla ? 'Tipo + talla' : 'Sin talla' }}</span>
-        <div class="fila">
-          <a class="boton" [routerLink]="['/inicio', local.idLocal]">Inicio</a>
-          <a class="boton primario" [routerLink]="['/venta', local.idLocal]">Vender</a>
-          <a class="boton" [routerLink]="['/compra', local.idLocal]">Comprar</a>
-          <a class="boton" [routerLink]="['/productos', local.idLocal]">Fichas</a>
+<div class="noche">
+  <app-fondo-estrellas></app-fondo-estrellas>
+  <div class="tiendas">
+    <div class="saludo">
+      <h1>Hola, {{ usuario || '¿quién entra?' }}</h1>
+      <p>¿Qué tienda abres hoy?</p>
+    </div>
+    @if (error) {
+      <div class="error">{{ error }}</div>
+    }
+    <div class="grilla">
+      @for (local of locales; track local.idLocal) {
+        <div class="tarjeta" [style.--tb]="fondo(local)" [style.--ta]="arte(local)">
+          <div class="arte">
+            <app-emblema [codigo]="local.codigo" [tam]="96"></app-emblema>
+          </div>
+          <div class="nombre">{{ local.nombre }}</div>
+          <small>{{ local.codigo === 'RELIGIOSOS' ? 'Artículos religiosos' : 'Uniformes escolares' }}</small>
+          <div class="fila">
+            <a class="boton oscuro" [routerLink]="['/inicio', local.idLocal]">Entrar</a>
+            <a class="boton claro" [routerLink]="['/venta', local.idLocal]">Vender</a>
+          </div>
         </div>
-      </div>
+      }
+    </div>
+    @if (!locales.length && !error) {
+      <p class="ayuda">Cargando tiendas…</p>
     }
   </div>
-  @if (!locales.length && !error) {
-    <p class="ayuda">Cargando locales…</p>
-  }
 </div>

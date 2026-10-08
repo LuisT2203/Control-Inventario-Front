@@ -1,13 +1,14 @@
-<div class="pantalla">
+<div class="pantalla noche">
+  <app-fondo-estrellas></app-fondo-estrellas>
   <div class="tarjeta">
-    <div class="marca">Kardex</div>
-    <h1>Entrar a la tablet</h1>
-    <p class="ayuda">Rosita usa Uniformes y Religiosos. Mary usa Limpieza.</p>
+    <div class="marca">Inicio de Sesion</div>
+    <h1>Bienvenida</h1>
+    <p class="ayuda">Escribe tu usuario y clave para abrir las tiendas.</p>
     <label>Usuario
-      <input [(ngModel)]="usuario" name="usuario" autocomplete="username" placeholder="rosita o mary">
+      <input [(ngModel)]="usuario" name="usuario" autocomplete="username" placeholder="Escribe tu usuario">
     </label>
     <label>Clave
-      <input [(ngModel)]="clave" name="clave" type="password" autocomplete="current-password" placeholder="••••••">
+      <input [(ngModel)]="clave" name="clave" type="password" autocomplete="current-password" placeholder="Escribe tu clave">
     </label>
     @if (error) {
       <div class="error">{{ error }}</div>

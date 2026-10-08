@@ -1,9 +1,10 @@
 .contenedor { max-width: 760px; margin: 0 auto; padding: 16px; }
 h1 { font-size: 22px; }
 h2 { font-size: 18px; }
+.stat { display: flex; flex-direction: column; gap: 2px; }
 .stat b { font-size: 30px; }
 h1 small { color: var(--mute); font-size: 1rem; }
-.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
 .tarjeta { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
 .mute { color: var(--mute); }
 .lista { padding: 0; overflow: hidden; }

@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../service/auth.service';
+import { FondoEstrellasComponent } from '../fondo-estrellas/fondo-estrellas.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, FondoEstrellasComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
@@ -31,9 +32,11 @@ export class LoginComponent {
     this.cargando = true;
     this.auth.login(this.usuario.trim(), this.clave).subscribe({
       next: () => this.router.navigate(['/locales']),
-      error: () => {
+      error: (e: { status?: number }) => {
         this.cargando = false;
-        this.error = 'Usuario o clave incorrectos.';
+        this.error = e?.status === 0
+          ? 'No se pudo conectar con el servidor. Revisa que la API esté encendida y en la misma red WiFi.'
+          : 'Usuario o clave incorrectos.';
       }
     });
   }
