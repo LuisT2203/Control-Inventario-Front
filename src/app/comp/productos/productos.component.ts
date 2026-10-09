@@ -404,6 +404,10 @@ export class ProductosComponent implements OnInit, OnDestroy {
   catSel = '';
   nuevaCat = '';
   guardandoFicha = false;
+  serieInfo = '';
+  prefijoSerie = '';
+  serieSiguiente: number | null = null;
+  serieAncho = 2;
   esAdmin = false;
   mostrandoImport = false;
   impOrigen: 'UNIFORMES' | 'RELIGIOSA' = 'UNIFORMES';
@@ -426,30 +430,87 @@ export class ProductosComponent implements OnInit, OnDestroy {
     this.form = { codigo: '', nombre: '', unidad: 'UND', activo: true };
     this.catSel = '';
     this.nuevaCat = '';
+    this.serieInfo = '';
+    this.prefijoSerie = '';
+    this.serieSiguiente = null;
     this.mostrandoFormulario = true;
     this.aviso = '';
   }
 
   elegirCategoriaForm(): void {
+    if (this.editandoId) {
+      if (this.catSel === '__NUEVA__') {
+        this.form.tipo = '';
+      } else {
+        this.form.tipo = this.catSel || null;
+      }
+      return;
+    }
+    this.form.nombre = '';
+    this.form.codigo = '';
+    this.serieInfo = '';
+    this.prefijoSerie = '';
+    this.serieSiguiente = null;
     if (this.catSel === '__NUEVA__') {
       this.form.tipo = '';
+      if (this.nuevaCat.trim()) {
+        this.pedirSerie(this.nuevaCat.trim());
+      }
       return;
     }
     this.form.tipo = this.catSel || null;
-    if (!this.editandoId && this.catSel) {
-      if (!this.form.nombre?.trim()) {
-        this.form.nombre = this.catSel;
-      }
-      this.productosService.siguienteCodigo(this.idLocal, this.catSel).subscribe({
-        next: (resp: MensajeResponse) => {
-          const s = resp.object as { codigo?: string | null };
-          if (s?.codigo) {
-            this.form.codigo = s.codigo;
-          }
-        },
-        error: () => undefined
-      });
+    if (!this.catSel) {
+      return;
     }
+    this.form.nombre = this.catSel;
+    this.pedirSerie(this.catSel);
+  }
+
+  nuevaCatCambio(): void {
+    if (this.editandoId || this.catSel !== '__NUEVA__') {
+      return;
+    }
+    this.form.tipo = this.nuevaCat.trim() || null;
+    this.form.nombre = '';
+    this.form.codigo = '';
+    this.serieInfo = '';
+    this.prefijoSerie = '';
+    this.serieSiguiente = null;
+    if (this.nuevaCat.trim().length >= 2) {
+      this.pedirSerie(this.nuevaCat.trim());
+    }
+  }
+
+  prefijoCambio(): void {
+    const p = this.prefijoSerie.trim().toUpperCase();
+    if (!p || this.serieSiguiente == null) {
+      return;
+    }
+    this.prefijoSerie = p;
+    this.form.codigo = `${p}-${String(this.serieSiguiente).padStart(this.serieAncho, '0')}`;
+  }
+
+  private pedirSerie(categoria: string): void {
+    this.productosService.siguienteCodigo(this.idLocal, categoria).subscribe({
+      next: (resp: MensajeResponse) => {
+        const s = resp.object as { prefijo?: string | null; siguiente?: number | null; codigo?: string | null; nuevaSerie?: boolean };
+        if (s?.codigo) {
+          this.form.codigo = s.codigo;
+          this.prefijoSerie = s.prefijo ?? '';
+          this.serieSiguiente = s.siguiente ?? null;
+          const parteNum = s.codigo.split('-').pop() ?? '';
+          this.serieAncho = parteNum.replace(/\D/g, '').length || 2;
+          this.serieInfo = s.nuevaSerie
+            ? `Serie nueva: prefijo sugerido ${s.prefijo} (editable abajo)`
+            : `Serie ${s.prefijo} · siguiente ${s.codigo}`;
+        } else {
+          this.error = 'No se pudo proponer código: respuesta vacía.';
+        }
+      },
+      error: (e) => {
+        this.error = 'No se pudo proponer código: ' + this.mensajeError(e);
+      }
+    });
   }
 
   editarDesdeFicha(): void {

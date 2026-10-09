@@ -60,12 +60,20 @@
       </label>
       @if (catSel === '__NUEVA__') {
         <label>Nueva categoría
-          <input [(ngModel)]="nuevaCat" name="nuevaCat" placeholder="Escribe el nombre exacto">
+          <input [(ngModel)]="nuevaCat" name="nuevaCat" (ngModelChange)="nuevaCatCambio()" placeholder="Escribe el nombre exacto">
+        </label>
+      }
+      @if (!editandoId && catSel === '__NUEVA__' && prefijoSerie) {
+        <label>Prefijo de la serie (editable)
+          <input [(ngModel)]="prefijoSerie" name="prefijoSerie" (ngModelChange)="prefijoCambio()" placeholder="PC">
         </label>
       }
       <label>Código (se propone solo)
-        <input [(ngModel)]="form.codigo" name="codigo" placeholder="Se completa al elegir categoría">
+        <input [(ngModel)]="form.codigo" name="codigo" [placeholder]="catSel === '__NUEVA__' ? 'Se sugiere al escribir la categoría' : 'Se propone al elegir categoría'">
       </label>
+      @if (serieInfo && !editandoId) {
+        <p class="mute">{{ serieInfo }}</p>
+      }
       <label>Nombre
         <input [(ngModel)]="form.nombre" name="nombre" placeholder="Chompa">
       </label>
