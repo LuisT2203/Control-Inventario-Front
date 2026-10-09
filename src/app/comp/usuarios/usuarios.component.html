@@ -1,0 +1,50 @@
+<div class="contenedor">
+  <h1>Usuarios</h1>
+  <p class="mute">Todos entran con acceso total. Desactivar corta el acceso de inmediato, incluso con sesión abierta.</p>
+
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+  @if (aviso) {
+    <div class="aviso">{{ aviso }}</div>
+  }
+
+  <div class="tarjeta">
+    <h2>Nuevo usuario</h2>
+    <div class="fila">
+      <label>Usuario
+        <input [(ngModel)]="nuevoUsuario" name="nuevoUsuario" placeholder="encargada" autocomplete="off">
+      </label>
+      <label>Clave (mínimo 10 caracteres)
+        <input [(ngModel)]="nuevaClave" name="nuevaClave" type="password" placeholder="••••••••••" autocomplete="new-password">
+      </label>
+    </div>
+    <button class="grande primario" (click)="crear()" [disabled]="guardandoCrear">{{ guardandoCrear ? 'Creando…' : 'Crear usuario' }}</button>
+  </div>
+
+  <div class="tarjeta tabla">
+    <table>
+      <thead><tr><th>Usuario</th><th>Estado</th><th>Nueva clave</th><th></th></tr></thead>
+      <tbody>
+        @for (u of usuarios; track u.id) {
+          <tr>
+            <td class="nw"><b>{{ u.usuario }}</b>@if (esYo(u)) { <small class="mute"> (tú)</small> }</td>
+            <td class="nw {{ u.estado ? 'ok' : 'mal' }}">{{ u.estado ? 'Activo' : 'Inactivo' }}</td>
+            <td>
+              <input [(ngModel)]="claves[u.id!]" [name]="'clave' + u.id" type="password" placeholder="Mínimo 10" autocomplete="new-password">
+            </td>
+            <td class="nw acc">
+              <button class="mini" (click)="cambiarClave(u)" [disabled]="procesandoId !== null">Clave</button>
+              <button class="mini" (click)="alternar(u)" [disabled]="procesandoId !== null || esYo(u)" [title]="esYo(u) ? 'No puedes desactivarte a ti mismo' : ''">
+                {{ u.estado ? 'Desactivar' : 'Activar' }}
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    @if (!usuarios.length) {
+      <p class="mute">Sin usuarios.</p>
+    }
+  </div>
+</div>

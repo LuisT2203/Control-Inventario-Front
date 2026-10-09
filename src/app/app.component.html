@@ -11,12 +11,17 @@
           <button [class.on]="l.idLocal === idLocal" (click)="irTienda(l.idLocal!)">{{ l.nombre }}</button>
         }
       </div>
+      @if (idLocal) {
       <a class="m-inicio" [routerLink]="['/inicio', idLocal]" routerLinkActive="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><span>Inicio</span></a>
       <a class="m-vender" [routerLink]="['/venta', idLocal]" routerLinkActive="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.5 11h10.5l2-8H6.5M9 20h.01M17 20h.01"/></svg><span>Vender</span></a>
       <a class="m-comprar" [routerLink]="['/compra', idLocal]" routerLinkActive="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v10m0 0l-4-4m4 4l4-4M4 17v4h16v-4"/></svg><span>Comprar</span></a>
       <a class="m-cambios" [routerLink]="['/cambios', idLocal]" routerLinkActive="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8h13l-3-3M17 16H4l3 3"/></svg><span>Cambios y devoluciones</span></a>
       <a class="m-productos" [routerLink]="['/productos', idLocal]" routerLinkActive="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5v8l-9 5-9-5V8zM3 8l9 5 9-5M12 13v8"/></svg><span>Productos</span></a>
       <a class="m-kardex" [routerLink]="['/kardex-local', idLocal]" routerLinkActive="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Kardex</span></a>
+      }
+      @if (auth.esAdmin()) {
+      <a class="m-usuarios" [routerLink]="['/usuarios']" routerLinkActive="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Usuarios</span></a>
+      }
       <button class="salir" (click)="salir()">{{ auth.getUsuario() }} · Salir</button>
     </nav>
   }

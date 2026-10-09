@@ -1,0 +1,40 @@
+.contenedor { max-width: 900px; margin: 0 auto; padding: 16px; }
+h1 { font-size: 22px; }
+h2 { font-size: 18px; }
+.mute { color: var(--mute); }
+.tarjeta { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin: 12px 0; }
+.tarjeta.tabla { padding: 8px; overflow: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+th { color: var(--mute); font-size: 0.85rem; font-weight: 400; }
+.nw { white-space: nowrap; }
+.ok { color: var(--ok); font-weight: 700; }
+.mal { color: var(--bad); font-weight: 700; }
+label { display: block; margin: 12px 0; font-weight: 600; }
+input {
+  display: block; width: 100%; margin-top: 6px; padding: 14px;
+  font-size: 1.05rem; border-radius: 12px; border: 2px solid var(--line); background: var(--card);
+}
+td input { padding: 10px; font-size: 0.95rem; margin-top: 0; min-width: 140px; }
+.fila { display: flex; gap: 12px; flex-wrap: wrap; }
+.fila label { flex: 1 1 220px; }
+.grande {
+  min-height: 54px; font-size: 1.1rem; font-weight: 700;
+  border: none; border-radius: 10px; padding: 0 22px; margin-top: 8px;
+}
+.grande.primario { background: var(--azul-noche); color: #fff; }
+.grande:disabled { opacity: 0.6; }
+.mini {
+  min-height: 44px; font-size: 0.95rem; font-weight: 600;
+  border-radius: 10px; border: 2px solid var(--line); background: var(--card); padding: 0 14px; margin: 2px 4px 2px 0;
+}
+.mini:disabled { opacity: 0.5; }
+.acc { text-align: right; }
+.error {
+  background: var(--card); color: var(--bad); border: 1px solid var(--bad);
+  border-radius: 12px; padding: 12px; margin: 12px 0; font-weight: 700;
+}
+.aviso {
+  background: var(--card); color: var(--ok); border: 1px solid var(--ok);
+  border-radius: 12px; padding: 12px; margin: 12px 0; font-weight: 700;
+}

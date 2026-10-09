@@ -15,7 +15,8 @@ const TITULOS: Record<string, string> = {
   'cambios': 'Cambios y devoluciones',
   'productos': 'Productos',
   'kardex-local': 'Kardex',
-  'kardex': 'Kardex'
+  'kardex': 'Kardex',
+  'usuarios': 'Usuarios'
 };
 
 @Component({
@@ -73,7 +74,8 @@ export class AppComponent implements OnInit {
   }
 
   irTienda(id: number): void {
-    this.router.navigate(['/' + this.modulo, id]);
+    const destino = this.modulo === 'usuarios' ? 'inicio' : this.modulo;
+    this.router.navigate(['/' + destino, id]);
   }
 
   salir(): void {
@@ -88,6 +90,9 @@ export class AppComponent implements OnInit {
       this.idLocal = Number(partes[1]) || 0;
     } else if (partes.length === 1 && this.esModulo(partes[0])) {
       this.modulo = partes[0];
+      if (partes[0] === 'usuarios') {
+        this.idLocal = 0;
+      }
     }
     if (this.dentro && !this.locales.length) {
       this.cargarLocales();
@@ -96,7 +101,7 @@ export class AppComponent implements OnInit {
   }
 
   private esModulo(m: string): boolean {
-    return ['inicio', 'venta', 'compra', 'cambios', 'productos', 'kardex-local'].includes(m);
+    return ['inicio', 'venta', 'compra', 'cambios', 'productos', 'kardex-local', 'usuarios'].includes(m);
   }
 
   private aplicarTema(): void {
