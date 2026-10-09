@@ -27,14 +27,14 @@ nav a.m-comprar { background: var(--pastel-comprar-suave); }
 nav a.m-cambios { background: var(--pastel-cambios-suave); }
 nav a.m-productos { background: var(--pastel-productos-suave); }
 nav a.m-kardex { background: var(--pastel-kardex-suave); }
-nav a.m-usuarios { background: var(--todas); }
+nav a.m-usuarios { background: #e7ecf52e; }
 nav a.m-inicio.on { background: var(--pastel-inicio); color: var(--azul-noche); font-weight: 700; }
 nav a.m-vender.on { background: var(--pastel-vender); color: var(--azul-noche); font-weight: 700; }
 nav a.m-comprar.on { background: var(--pastel-comprar); color: var(--azul-noche); font-weight: 700; }
 nav a.m-cambios.on { background: var(--pastel-cambios); color: var(--azul-noche); font-weight: 700; }
 nav a.m-productos.on { background: var(--pastel-productos); color: var(--azul-noche); font-weight: 700; }
 nav a.m-kardex.on { background: var(--pastel-kardex); color: var(--azul-noche); font-weight: 700; }
-nav a.m-usuarios.on { background: var(--azul-noche); color: #fff; font-weight: 700; }
+nav a.m-usuarios.on { background: var(--todas); color: var(--azul-noche); font-weight: 700; }
 nav .salir {
   margin-top: auto; font-size: 14px; min-height: 44px; background: none;
   border: 0; color: var(--noche-mute); text-align: left; padding: 0 10px; cursor: pointer;
