@@ -71,4 +71,13 @@ export class ProductoService {
   actualizarPreciosCostos(lineas: { idProducto: number; precioVenta: number | null; costoReferencia: number | null }[]): Observable<MensajeResponse> {
     return this.http.put<MensajeResponse>(`${this.baseURL}/updatePreciosCostos`, lineas);
   }
+
+  importarExcel(idLocal: number, origen: string, archivo: File, previa: boolean): Observable<MensajeResponse> {
+    const datos = new FormData();
+    datos.append('archivo', archivo, archivo.name);
+    datos.append('idLocal', String(idLocal));
+    datos.append('origen', origen);
+    datos.append('previa', String(previa));
+    return this.http.post<MensajeResponse>(`${this.baseURL}/importarExcel`, datos);
+  }
 }

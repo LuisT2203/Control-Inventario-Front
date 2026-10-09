@@ -9,6 +9,7 @@ import { LocalService } from '../../service/local.service';
 import { FechaCortaPipe } from '../../pipes/fecha-corta.pipe';
 import { MovimientoService } from '../../service/movimiento.service';
 import { ProductoService } from '../../service/producto.service';
+import { AuthService } from '../../service/auth.service';
 import { ToastService } from '../../service/toast.service';
 import { COLOR_TODAS, colorCategoria } from '../../tema-tienda';
 import { SolesPipe } from '../../pipes/soles.pipe';
@@ -42,7 +43,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
   editandoId: number | null = null;
   form: Producto = { codigo: '', nombre: '' };
   ficha: { producto: Producto; movimientos: Movimiento[] } | null = null;
-  prenda: { id: number; codigo: string; nombre: string; talla: string | null; stock?: number; precio: number | null; costo: number | null }[] | null = null;
+  prenda: { id: number; codigo: string; nombre: string; talla: string | null; stock?: number;   precio: number | null; costo: number | null }[] | null = null;
   mismoPrecio: number | null = null;
   mismoCosto: number | null = null;
   errorPrenda = '';
@@ -60,10 +61,12 @@ export class ProductosComponent implements OnInit, OnDestroy {
     private localesService: LocalService,
     private productosService: ProductoService,
     private movimientosService: MovimientoService,
+    private authService: AuthService,
     private toast: ToastService
   ) { }
 
   ngOnInit(): void {
+    this.esAdmin = this.authService.esAdmin();
     this.rutaSub = this.route.paramMap.subscribe((params: ParamMap) => {
       const nuevo = Number(params.get('idLocal'));
       if (nuevo !== this.idLocal) {
@@ -400,6 +403,21 @@ export class ProductosComponent implements OnInit, OnDestroy {
   catSel = '';
   nuevaCat = '';
   guardandoFicha = false;
+  esAdmin = false;
+  mostrandoImport = false;
+  impOrigen: 'UNIFORMES' | 'RELIGIOSA' = 'UNIFORMES';
+  impArchivo: File | null = null;
+  impPrevia: {
+    archivo: string; totalFilas: number; nuevas: number; ajustesEntrada: number;
+    ajustesSalida: number; sinCambios: number; errores: number;
+    items: { fila: number; codigo: string; nombre: string; accion: string; mensaje: string }[];
+  } | null = null;
+  impReporte: {
+    creadas: number; ajustadas: number; sinCambios: number; errores: number;
+    items: { fila: number; codigo: string; nombre: string; resultado: string; mensaje: string }[];
+  } | null = null;
+  impError = '';
+  cargandoImport = false;
 
   nuevaFicha(): void {
     this.editandoId = null;
@@ -506,6 +524,115 @@ export class ProductosComponent implements OnInit, OnDestroy {
         this.error = this.mensajeError(e);
       }
     });
+  }
+
+  abrirImport(): void {
+    this.mostrandoImport = true;
+    this.impOrigen = this.exigeTalla ? 'UNIFORMES' : 'RELIGIOSA';
+    this.impArchivo = null;
+    this.impPrevia = null;
+    this.impReporte = null;
+    this.impError = '';
+  }
+
+  cerrarImport(): void {
+    this.mostrandoImport = false;
+  }
+
+  elegirArchivo(ev: Event): void {
+    this.impError = '';
+    this.impPrevia = null;
+    this.impReporte = null;
+    const input = ev.target as HTMLInputElement;
+    const archivo = input.files?.[0] ?? null;
+    if (!archivo) {
+      this.impArchivo = null;
+      return;
+    }
+    if (!archivo.name.toLowerCase().endsWith('.xlsx')) {
+      this.impError = 'El archivo debe ser .xlsx';
+      this.impArchivo = null;
+      return;
+    }
+    if (archivo.size > 10 * 1024 * 1024) {
+      this.impError = 'El archivo supera los 10 MB';
+      this.impArchivo = null;
+      return;
+    }
+    this.impArchivo = archivo;
+  }
+
+  vistaPrevia(): void {
+    this.impError = '';
+    if (!this.impArchivo || this.cargandoImport) {
+      return;
+    }
+    this.cargandoImport = true;
+    this.productosService.importarExcel(this.idLocal, this.impOrigen, this.impArchivo, true).subscribe({
+      next: (resp: MensajeResponse) => {
+        this.cargandoImport = false;
+        this.impPrevia = resp.object as NonNullable<ProductosComponent['impPrevia']>;
+        this.impReporte = null;
+      },
+      error: (e) => {
+        this.cargandoImport = false;
+        this.impError = this.mensajeError(e);
+      }
+    });
+  }
+
+  confirmar(): void {
+    this.impError = '';
+    if (!this.impArchivo || !this.impPrevia || this.cargandoImport) {
+      return;
+    }
+    this.cargandoImport = true;
+    this.productosService.importarExcel(this.idLocal, this.impOrigen, this.impArchivo, false).subscribe({
+      next: (resp: MensajeResponse) => {
+        this.cargandoImport = false;
+        this.impReporte = resp.object as NonNullable<ProductosComponent['impReporte']>;
+        this.impPrevia = null;
+        this.cargar();
+        this.cargarContexto();
+        this.toast.mostrar(resp.mensaje);
+      },
+      error: (e) => {
+        this.cargandoImport = false;
+        this.impError = this.mensajeError(e);
+      }
+    });
+  }
+
+  textoAccion(accion: string): string {
+    switch (accion) {
+      case 'CREAR': return 'Crear';
+      case 'AJUSTE_ENTRADA': return 'Ajuste +';
+      case 'AJUSTE_SALIDA': return 'Ajuste −';
+      case 'SIN_CAMBIOS': return 'Sin cambios';
+      default: return 'Error';
+    }
+  }
+
+  claseAccion(accion: string): string {
+    switch (accion) {
+      case 'CREAR': return 'acc-bien';
+      case 'AJUSTE_ENTRADA':
+      case 'AJUSTE_SALIDA': return 'acc-ajuste';
+      case 'ERROR': return 'acc-mal';
+      default: return '';
+    }
+  }
+
+  get ajustesPrevia(): number {
+    return (this.impPrevia?.ajustesEntrada ?? 0) + (this.impPrevia?.ajustesSalida ?? 0);
+  }
+
+  get cambiosPrevia(): number {
+    return (this.impPrevia?.nuevas ?? 0) + this.ajustesPrevia;
+  }
+
+  get erroresReporte(): { fila: number; codigo: string; mensaje: string }[] {
+    return (this.impReporte?.items ?? []).filter(i => i.resultado === 'ERROR').slice(0, 50);
   }
 
   private mensajeError(e: unknown): string {

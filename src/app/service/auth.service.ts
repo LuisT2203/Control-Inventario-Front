@@ -47,6 +47,20 @@ export class AuthService {
     return localStorage.getItem('inv_usuario');
   }
 
+  esAdmin(): boolean {
+    const t = this.getToken();
+    if (!t) {
+      return false;
+    }
+    try {
+      const cuerpo = t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const datos = JSON.parse(atob(cuerpo)) as { tipo?: string };
+      return datos?.tipo === 'admin';
+    } catch {
+      return false;
+    }
+  }
+
   private getRefresh(): string | null {
     return localStorage.getItem('inv_refresh');
   }

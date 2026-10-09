@@ -105,3 +105,6 @@ table.doct th.r, table.doct td.r { text-align: right; white-space: nowrap; }
   background: var(--card); color: var(--ok); border: 1px solid var(--ok);
   border-radius: 12px; padding: 12px; margin: 12px 0; font-weight: 700;
 }
+.acc-bien { color: var(--ok); font-weight: 700; }
+.acc-ajuste { color: var(--warn); font-weight: 700; }
+.acc-mal { color: var(--bad); font-weight: 700; }

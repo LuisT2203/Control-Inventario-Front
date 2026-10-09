@@ -42,6 +42,9 @@
         }
       </div>
       <button class="chip accion" (click)="nuevaFicha()">+ Producto</button>
+      @if (esAdmin) {
+        <button class="chip accion" (click)="abrirImport()">Cargar Excel</button>
+      }
 
   @if (mostrandoFormulario) {
     <div class="tarjeta">
@@ -93,6 +96,70 @@
         <button class="grande primario" (click)="guardar()" [disabled]="guardandoFicha">{{ guardandoFicha ? 'Guardando…' : 'Guardar' }}</button>
         <button class="grande" (click)="mostrandoFormulario = false">Cerrar</button>
       </div>
+    </div>
+  }
+
+  @if (mostrandoImport) {
+    <div class="tarjeta">
+      <h2>Cargar inventario desde Excel</h2>
+      <p class="mute">Origen: {{ impOrigen === 'UNIFORMES' ? 'Uniformes (hoja Inventario)' : 'Tienda religiosa (Medallas, Vestuario, Accesorios, Imágenes)' }}. Código nuevo crea la ficha; código existente solo ajusta el stock.</p>
+      <label>Archivo .xlsx (máx 10 MB)
+        <input type="file" accept=".xlsx" (change)="elegirArchivo($event)">
+      </label>
+      @if (impError) {
+        <div class="error">{{ impError }}</div>
+      }
+      <div class="fila">
+        <button class="grande primario" (click)="vistaPrevia()" [disabled]="!impArchivo || cargandoImport">{{ cargandoImport ? 'Leyendo…' : 'Ver previa' }}</button>
+        <button class="grande" (click)="cerrarImport()">Cerrar</button>
+      </div>
+      @if (impPrevia) {
+        <p><b>{{ impPrevia.archivo }}</b>: {{ impPrevia.nuevas }} nuevas, {{ ajustesPrevia }} ajustes, {{ impPrevia.sinCambios }} sin cambios, {{ impPrevia.errores }} errores.</p>
+        <div class="tarjeta tabla desplaza">
+          <table>
+            <thead><tr><th>Fila</th><th>Código</th><th>Producto</th><th>Acción</th><th>Detalle</th></tr></thead>
+            <tbody>
+              @for (it of impPrevia.items.slice(0, 30); track it.fila) {
+                <tr>
+                  <td>{{ it.fila }}</td>
+                  <td class="nw"><b>{{ it.codigo }}</b></td>
+                  <td>{{ it.nombre }}</td>
+                  <td class="nw {{ claseAccion(it.accion) }}">{{ textoAccion(it.accion) }}</td>
+                  <td>{{ it.mensaje }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        @if (impPrevia.items.length > 30) {
+          <p class="mute">…y {{ impPrevia.items.length - 30 }} filas más.</p>
+        }
+        @if (impPrevia.errores) {
+          <p class="mute">Las filas con error no se cargan.</p>
+        }
+        <div class="fila">
+          <button class="grande primario" (click)="confirmar()" [disabled]="cargandoImport || !cambiosPrevia">{{ cargandoImport ? 'Cargando…' : 'Confirmar carga' }}</button>
+        </div>
+      }
+      @if (impReporte) {
+        <div class="aviso">Carga terminada: {{ impReporte.creadas }} creadas, {{ impReporte.ajustadas }} ajustadas, {{ impReporte.sinCambios }} sin cambios, {{ impReporte.errores }} errores.</div>
+        @if (impReporte.errores) {
+          <div class="tarjeta tabla desplaza">
+            <table>
+              <thead><tr><th>Fila</th><th>Código</th><th>Error</th></tr></thead>
+              <tbody>
+                @for (it of erroresReporte; track it.fila) {
+                  <tr>
+                    <td>{{ it.fila }}</td>
+                    <td class="nw"><b>{{ it.codigo }}</b></td>
+                    <td>{{ it.mensaje }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
     </div>
   }
 
