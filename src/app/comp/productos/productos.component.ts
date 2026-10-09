@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, ParamMap, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -77,6 +77,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
         this.ficha = null;
         this.prenda = null;
         this.mostrandoFormulario = false;
+        this.resetearImport();
       }
       this.idLocal = nuevo;
       this.cargarContexto();
@@ -418,6 +419,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
   } | null = null;
   impError = '';
   cargandoImport = false;
+  @ViewChild('archivoInput') archivoInput?: ElementRef<HTMLInputElement>;
 
   nuevaFicha(): void {
     this.editandoId = null;
@@ -533,10 +535,26 @@ export class ProductosComponent implements OnInit, OnDestroy {
     this.impPrevia = null;
     this.impReporte = null;
     this.impError = '';
+    this.limpiarInputArchivo();
   }
 
   cerrarImport(): void {
+    this.resetearImport();
+  }
+
+  private resetearImport(): void {
     this.mostrandoImport = false;
+    this.impArchivo = null;
+    this.impPrevia = null;
+    this.impReporte = null;
+    this.impError = '';
+    this.limpiarInputArchivo();
+  }
+
+  private limpiarInputArchivo(): void {
+    if (this.archivoInput) {
+      this.archivoInput.nativeElement.value = '';
+    }
   }
 
   elegirArchivo(ev: Event): void {
@@ -592,6 +610,8 @@ export class ProductosComponent implements OnInit, OnDestroy {
         this.cargandoImport = false;
         this.impReporte = resp.object as NonNullable<ProductosComponent['impReporte']>;
         this.impPrevia = null;
+        this.impArchivo = null;
+        this.limpiarInputArchivo();
         this.cargar();
         this.cargarContexto();
         this.toast.mostrar(resp.mensaje);
@@ -633,6 +653,10 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
   get erroresReporte(): { fila: number; codigo: string; mensaje: string }[] {
     return (this.impReporte?.items ?? []).filter(i => i.resultado === 'ERROR').slice(0, 50);
+  }
+
+  get erroresPrevia(): { fila: number; codigo: string; mensaje: string }[] {
+    return (this.impPrevia?.items ?? []).filter(i => i.accion === 'ERROR').slice(0, 50);
   }
 
   private mensajeError(e: unknown): string {
